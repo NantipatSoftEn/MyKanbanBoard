@@ -55,7 +55,7 @@ export default function KanbanBoard() {
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
-    priority: "medium" as const,
+    priority: "medium" as Task["priority"],
     due_date: "",
     assignee: "",
   })
@@ -360,7 +360,7 @@ export default function KanbanBoard() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">My Kanban Board</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Army Kanban Board</h1>
           <div className="flex items-center gap-3">
             <Badge
               variant={isConnected ? "default" : usingMockData ? "secondary" : "destructive"}
@@ -369,7 +369,7 @@ export default function KanbanBoard() {
               {isConnected ? (
                 <>
                   <Wifi className="h-3 w-3" />
-                  Connected to Supabase
+                  Connected
                 </>
               ) : usingMockData ? (
                 <>
