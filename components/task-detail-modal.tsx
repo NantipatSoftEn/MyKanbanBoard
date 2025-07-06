@@ -68,7 +68,7 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            {isEditing && !readOnly ? (
+            {isEditing ? (
               <Input
                 value={editedTask.title}
                 onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
@@ -78,20 +78,24 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
               <span>{task.title}</span>
             )}
             <div className="flex gap-2">
-              {!readOnly && !isEditing ? (
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                  Edit
-                </Button>
-              ) : !readOnly && isEditing ? (
+              {!readOnly && (
                 <>
-                  <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
-                    Cancel
-                  </Button>
-                  <Button size="sm" onClick={handleSave}>
-                    Save
-                  </Button>
+                  {!isEditing ? (
+                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                      Edit
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSave}>
+                        Save
+                      </Button>
+                    </>
+                  )}
                 </>
-              ) : null}
+              )}
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -101,7 +105,7 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
           <div className="flex gap-4">
             <div className="flex-1">
               <Label className="text-sm font-medium">Status</Label>
-              {isEditing && !readOnly ? (
+              {isEditing ? (
                 <Select
                   value={editedTask.status}
                   onValueChange={(value: "todo" | "inprogress" | "done") =>
@@ -128,7 +132,7 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
 
             <div className="flex-1">
               <Label className="text-sm font-medium">Priority</Label>
-              {isEditing && !readOnly ? (
+              {isEditing ? (
                 <Select
                   value={editedTask.priority}
                   onValueChange={(value: "low" | "medium" | "high") =>
@@ -158,7 +162,7 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
           {/* Description */}
           <div>
             <Label className="text-sm font-medium">Description</Label>
-            {isEditing && !readOnly ? (
+            {isEditing ? (
               <Textarea
                 value={editedTask.description || ""}
                 onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
@@ -176,7 +180,7 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-sm font-medium">Due Date</Label>
-              {isEditing && !readOnly ? (
+              {isEditing ? (
                 <Input
                   type="date"
                   value={editedTask.due_date || ""}
@@ -193,7 +197,7 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
 
             <div>
               <Label className="text-sm font-medium">Assignee</Label>
-              {isEditing && !readOnly ? (
+              {isEditing ? (
                 <Input
                   value={editedTask.assignee || ""}
                   onChange={(e) => setEditedTask({ ...editedTask, assignee: e.target.value })}
@@ -223,14 +227,12 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
 
           {/* Actions */}
           <div className="flex justify-between pt-4 border-t">
-            {!readOnly ? (
+            {!readOnly && (
               <Button variant="destructive" onClick={handleDelete}>
                 Delete Task
               </Button>
-            ) : (
-              <div></div>
             )}
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} className={readOnly ? "ml-auto" : ""}>
               Close
             </Button>
           </div>

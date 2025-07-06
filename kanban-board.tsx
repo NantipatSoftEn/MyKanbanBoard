@@ -13,7 +13,9 @@ import {
   AlertTriangle,
   RefreshCw,
   Lock,
+  LogIn,
   LogOut,
+  User,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -25,11 +27,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { taskOperations, mockTasks, type Task, type Column } from "./lib/supabase"
 import { TaskDetailModal } from "./components/task-detail-modal"
-import { useAuth } from "./contexts/auth-context"
-import { FloatingLoginButton } from "./components/floating-login-button"
+import { AuthModal } from "./components/auth-modal"
+import { useAuth } from "./contexts/supabase-auth-context"
 
 export default function KanbanBoard() {
-  const { isAuthenticated, logout } = useAuth()
+  const { user, signOut } = useAuth()
+  const isAuthenticated = !!user
 
   const [columns, setColumns] = useState<Column[]>([
     { id: "todo", title: "To Do", tasks: [] },
@@ -42,6 +45,7 @@ export default function KanbanBoard() {
   const [showAddTask, setShowAddTask] = useState<string | null>(null)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
@@ -56,56 +60,62 @@ export default function KanbanBoard() {
     assignee: "",
   })
 
-  // Load tasks on component mount
+  // Load tasks on component mount and when user changes
   useEffect(() => {
     loadTasks()
-  }, [])
+  }, []) // Remove user dependency for initial load
+
+  // Reload when user logs in/out to show their personal tasks vs all tasks
+  useEffect(() => {
+    if (user !== null) {
+      loadTasks()
+    }
+  }, [user])
 
   const loadTasks = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      // First check if the table exists
+      // Always try to load from database first, regardless of auth status
       const tableExists = await taskOperations.checkTableExists()
 
-      if (!tableExists) {
-        throw new Error("The 'tasks' table does not exist. Please run the SQL script to create it.")
+      if (tableExists) {
+        try {
+          const tasks = await taskOperations.getAllTasks()
+          setIsConnected(true)
+          setUsingMockData(false)
+
+          // Group tasks by status
+          const groupedTasks = tasks.reduce(
+            (acc, task) => {
+              if (!acc[task.status]) acc[task.status] = []
+              acc[task.status].push(task)
+              return acc
+            },
+            {} as Record<string, Task[]>,
+          )
+
+          setColumns((prev) =>
+            prev.map((column) => ({
+              ...column,
+              tasks: groupedTasks[column.id] || [],
+            })),
+          )
+        } catch (dbError: any) {
+          console.error("Database error, falling back to mock data:", dbError)
+          loadMockData()
+        }
+      } else {
+        // Table doesn't exist, use mock data
+        setError("Database table not found. Showing demo data.")
+        loadMockData()
       }
-
-      const tasks = await taskOperations.getAllTasks()
-      setIsConnected(true)
-      setUsingMockData(false)
-
-      // Group tasks by status
-      const groupedTasks = tasks.reduce(
-        (acc, task) => {
-          if (!acc[task.status]) acc[task.status] = []
-          acc[task.status].push(task)
-          return acc
-        },
-        {} as Record<string, Task[]>,
-      )
-
-      setColumns((prev) =>
-        prev.map((column) => ({
-          ...column,
-          tasks: groupedTasks[column.id] || [],
-        })),
-      )
     } catch (err: any) {
       console.error("Error loading tasks:", err)
-
-      // Check if it's a table not found error
-      if (err.message.includes("does not exist") || err.message.includes("relation")) {
-        setError("Database table not found. Please run the SQL script to create the 'tasks' table.")
-      } else {
-        setError(`Failed to connect to database: ${err.message}`)
-      }
-
+      setError(`Failed to connect to database: ${err.message}`)
       setIsConnected(false)
-
-      // Fall back to mock data
+      // Always fall back to mock data so users can see the board
       loadMockData()
     } finally {
       setLoading(false)
@@ -134,7 +144,10 @@ export default function KanbanBoard() {
   }
 
   const handleDragStart = (task: Task, columnId: string) => {
-    if (!isAuthenticated) return // Prevent drag if not authenticated
+    if (!isAuthenticated) {
+      // Don't show modal immediately, just prevent drag
+      return
+    }
     setDraggedTask(task)
     setDraggedFrom(columnId)
   }
@@ -190,7 +203,12 @@ export default function KanbanBoard() {
   }
 
   const addTask = async (columnId: string) => {
-    if (!isAuthenticated || !newTask.title.trim()) return
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true)
+      return
+    }
+
+    if (!newTask.title.trim()) return
 
     const taskData: Task = {
       id: `temp-${Date.now()}`, // Temporary ID for mock data
@@ -245,7 +263,10 @@ export default function KanbanBoard() {
   }
 
   const updateTask = async (updatedTask: Task) => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true)
+      return
+    }
 
     // Update local state immediately
     setColumns((prevColumns) =>
@@ -276,7 +297,10 @@ export default function KanbanBoard() {
   }
 
   const deleteTask = async (taskId: string) => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true)
+      return
+    }
 
     // Update local state immediately
     setColumns((prevColumns) =>
@@ -312,6 +336,12 @@ export default function KanbanBoard() {
         return "bg-green-100 text-green-800 border-green-200"
       default:
         return "bg-gray-100 text-gray-800 border-gray-200"
+    }
+  }
+
+  const handleTaskClick = (task: Task) => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true)
     }
   }
 
@@ -354,20 +384,32 @@ export default function KanbanBoard() {
               )}
             </Badge>
 
-            <Badge variant={isAuthenticated ? "default" : "outline"} className="flex items-center gap-1">
-              <Lock className="h-3 w-3" />
-              {isAuthenticated ? "Authenticated" : "View Only"}
-            </Badge>
+            {isAuthenticated ? (
+              <Badge variant="default" className="flex items-center gap-1">
+                <User className="h-3 w-3" />
+                {user?.email}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Lock className="h-3 w-3" />
+                View Only
+              </Badge>
+            )}
 
             <Button variant="outline" size="sm" onClick={loadTasks} disabled={loading}>
               <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
 
-            {isAuthenticated && (
-              <Button variant="outline" size="sm" onClick={logout}>
+            {isAuthenticated ? (
+              <Button variant="outline" size="sm" onClick={signOut}>
                 <LogOut className="h-3 w-3 mr-1" />
                 Logout
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setIsAuthModalOpen(true)}>
+                <LogIn className="h-3 w-3 mr-1" />
+                Login
               </Button>
             )}
           </div>
@@ -419,9 +461,12 @@ export default function KanbanBoard() {
                 {column.tasks.map((task) => (
                   <Card
                     key={task.id}
-                    className={`${isAuthenticated ? "cursor-move" : "cursor-default"} hover:shadow-md transition-shadow bg-white ${!isAuthenticated ? "opacity-90" : ""}`}
+                    className={`${
+                      isAuthenticated ? "cursor-move hover:shadow-md" : "cursor-default hover:shadow-sm"
+                    } transition-shadow bg-white ${!isAuthenticated ? "opacity-95" : ""}`}
                     draggable={isAuthenticated}
                     onDragStart={() => handleDragStart(task, column.id)}
+                    onClick={() => !isAuthenticated && handleTaskClick(task)}
                   >
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between">
@@ -438,7 +483,7 @@ export default function KanbanBoard() {
                           >
                             <Eye className="h-3 w-3 text-blue-500" />
                           </Button>
-                          {isAuthenticated && (
+                          {isAuthenticated ? (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -446,6 +491,15 @@ export default function KanbanBoard() {
                               onClick={() => deleteTask(task.id)}
                             >
                               <X className="h-3 w-3 text-red-500" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 opacity-50 cursor-not-allowed"
+                              onClick={() => setIsAuthModalOpen(true)}
+                            >
+                              <X className="h-3 w-3 text-gray-400" />
                             </Button>
                           )}
                         </div>
@@ -469,131 +523,133 @@ export default function KanbanBoard() {
                 ))}
               </div>
 
-              {isAuthenticated ? (
-                showAddTask === column.id ? (
-                  <div className="mt-3 space-y-3 p-3 bg-white rounded-lg border">
+              {showAddTask === column.id && isAuthenticated ? (
+                <div className="mt-3 space-y-3 p-3 bg-white rounded-lg border">
+                  <div>
+                    <Label htmlFor="title" className="text-sm font-medium">
+                      Title *
+                    </Label>
+                    <Input
+                      id="title"
+                      placeholder="Enter task title..."
+                      value={newTask.title}
+                      onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description" className="text-sm font-medium">
+                      Description
+                    </Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Add a description..."
+                      value={newTask.description}
+                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label htmlFor="title" className="text-sm font-medium">
-                        Title *
+                      <Label htmlFor="priority" className="text-sm font-medium">
+                        Priority
+                      </Label>
+                      <Select
+                        value={newTask.priority}
+                        onValueChange={(value: "low" | "medium" | "high") =>
+                          setNewTask({ ...newTask, priority: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="due_date" className="text-sm font-medium">
+                        Due Date
                       </Label>
                       <Input
-                        id="title"
-                        placeholder="Enter task title..."
-                        value={newTask.title}
-                        onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                        autoFocus
+                        id="due_date"
+                        type="date"
+                        value={newTask.due_date}
+                        onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
                       />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description" className="text-sm font-medium">
-                        Description
-                      </Label>
-                      <Textarea
-                        id="description"
-                        placeholder="Add a description..."
-                        value={newTask.description}
-                        onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                        rows={2}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label htmlFor="priority" className="text-sm font-medium">
-                          Priority
-                        </Label>
-                        <Select
-                          value={newTask.priority}
-                          onValueChange={(value: "low" | "medium" | "high") =>
-                            setNewTask({ ...newTask, priority: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="low">Low</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="high">High</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="due_date" className="text-sm font-medium">
-                          Due Date
-                        </Label>
-                        <Input
-                          id="due_date"
-                          type="date"
-                          value={newTask.due_date}
-                          onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="assignee" className="text-sm font-medium">
-                        Assignee
-                      </Label>
-                      <Input
-                        id="assignee"
-                        placeholder="Assign to..."
-                        value={newTask.assignee}
-                        onChange={(e) => setNewTask({ ...newTask, assignee: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => addTask(column.id)}
-                        className="flex-1"
-                        disabled={!newTask.title.trim()}
-                      >
-                        Add Task
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setShowAddTask(null)
-                          setNewTask({
-                            title: "",
-                            description: "",
-                            priority: "medium",
-                            due_date: "",
-                            assignee: "",
-                          })
-                        }}
-                      >
-                        Cancel
-                      </Button>
                     </div>
                   </div>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="w-full mt-3 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-                    onClick={() => setShowAddTask(column.id)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add a task
-                  </Button>
-                )
-              ) : (
-                <div className="mt-3 p-3 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-center">
-                  <Lock className="h-4 w-4 mx-auto mb-2 text-gray-400" />
-                  <p className="text-xs text-gray-500">Login to add tasks</p>
+
+                  <div>
+                    <Label htmlFor="assignee" className="text-sm font-medium">
+                      Assignee
+                    </Label>
+                    <Input
+                      id="assignee"
+                      placeholder="Assign to..."
+                      value={newTask.assignee}
+                      onChange={(e) => setNewTask({ ...newTask, assignee: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => addTask(column.id)}
+                      className="flex-1"
+                      disabled={!newTask.title.trim()}
+                    >
+                      Add Task
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setShowAddTask(null)
+                        setNewTask({
+                          title: "",
+                          description: "",
+                          priority: "medium",
+                          due_date: "",
+                          assignee: "",
+                        })
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
+              ) : isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  className="w-full mt-3 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                  onClick={() => setShowAddTask(column.id)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add a task
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="w-full mt-3 border-2 border-dashed border-gray-200 opacity-60 cursor-not-allowed"
+                  onClick={() => setIsAuthModalOpen(true)}
+                >
+                  <Lock className="h-4 w-4 mr-2" />
+                  Login to add tasks
+                </Button>
               )}
             </div>
           ))}
         </div>
       </div>
 
-      <FloatingLoginButton />
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       <TaskDetailModal
         task={selectedTask}
