@@ -58,7 +58,7 @@ export default function KanbanBoard() {
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
-    priority: "medium" as const,
+    priority: "medium" as Task["priority"],
     due_date: "",
     assignee: "",
   })

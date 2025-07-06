@@ -203,7 +203,7 @@ export const taskOperations = {
       const { data, error } = await supabase
         .from("tasks")
         .select("*")
-        .is("deleted_at", null)
+        .eq("is_deleted", false)
         .order("position", { ascending: true })
 
       if (error) {
@@ -234,7 +234,7 @@ export const taskOperations = {
 
   // Create a new task (requires authentication)
   async createTask(
-    task: Omit<Task, "id" | "created_at" | "updated_at" | "user_id" | "is_public" | "deleted_at">,
+    task: Omit<Task, "id" | "created_at" | "updated_at" | "user_id" | "is_public" | "deleted_at" | "is_deleted">,
   ): Promise<Task> {
     const {
       data: { user },
@@ -246,6 +246,7 @@ export const taskOperations = {
 
     const taskWithUser = {
       ...task,
+      is_deleted: false,
       user_id: user.id,
       is_public: false, // User tasks are private by default
     }
@@ -279,7 +280,7 @@ export const taskOperations = {
         .update({ ...safeUpdates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .eq("user_id", user.id)
-        .is("deleted_at", null)
+        .is("deleted_at", false)
         .select()
         .single()
 
@@ -320,16 +321,17 @@ export const taskOperations = {
 
     try {
       // Try soft delete first (if deleted_at column exists)
-      let { error } = await supabase
+      let { data, error } = await supabase
         .from("tasks")
         .update({
+          is_deleted: true,
           deleted_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)
         .eq("user_id", user.id)
-        .is("deleted_at", null)
-
+        
+      console.log("Soft deleting task:", id, data, error)
       // If deleted_at column doesn't exist, fall back to hard delete
       if (error && error.message.includes("deleted_at") && error.message.includes("does not exist")) {
         console.log("deleted_at column not found, performing hard delete")
