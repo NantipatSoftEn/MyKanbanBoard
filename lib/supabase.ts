@@ -7,7 +7,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export interface Task {
   id: string
-  user_id?: string
   title: string
   description?: string | null
   status: "todo" | "inprogress" | "done"
@@ -114,7 +113,7 @@ export const mockTasks: Task[] = [
   },
 ]
 
-// Database operations with user authentication
+// Database operations with better error handling
 export const taskOperations = {
   // Check if the tasks table exists
   async checkTableExists(): Promise<boolean> {
@@ -126,7 +125,7 @@ export const taskOperations = {
     }
   },
 
-  // Get all tasks for the current user
+  // Get all tasks
   async getAllTasks(): Promise<Task[]> {
     const { data, error } = await supabase.from("tasks").select("*").order("position", { ascending: true })
 
@@ -137,22 +136,9 @@ export const taskOperations = {
     return data || []
   },
 
-  // Create a new task for the current user
-  async createTask(task: Omit<Task, "id" | "created_at" | "updated_at" | "user_id">): Promise<Task> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error("User not authenticated")
-    }
-
-    const taskWithUser = {
-      ...task,
-      user_id: user.id,
-    }
-
-    const { data, error } = await supabase.from("tasks").insert([taskWithUser]).select().single()
+  // Create a new task
+  async createTask(task: Omit<Task, "id" | "created_at" | "updated_at">): Promise<Task> {
+    const { data, error } = await supabase.from("tasks").insert([task]).select().single()
 
     if (error) {
       console.error("Supabase error:", error)

@@ -3,15 +3,15 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { LogIn } from "lucide-react"
-import { useAuth } from "../contexts/supabase-auth-context"
+import { useAuth } from "../contexts/auth-context"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { SupabaseAuthLogin } from "./supabase-auth-login"
+import { CyberpunkLogin } from "./cyberpunk-login"
 
 export function FloatingLoginButton() {
-  const { user } = useAuth()
+  const { isAuthenticated } = useAuth()
   const [showLogin, setShowLogin] = useState(false)
 
-  if (user) return null
+  if (isAuthenticated) return null
 
   return (
     <>
@@ -25,7 +25,7 @@ export function FloatingLoginButton() {
 
       <Dialog open={showLogin} onOpenChange={setShowLogin}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none">
-          <SupabaseAuthLogin />
+          <CyberpunkLogin />
         </DialogContent>
       </Dialog>
     </>

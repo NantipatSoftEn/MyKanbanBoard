@@ -25,12 +25,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { taskOperations, mockTasks, type Task, type Column } from "./lib/supabase"
 import { TaskDetailModal } from "./components/task-detail-modal"
-import { useAuth } from "./contexts/supabase-auth-context"
+import { useAuth } from "./contexts/auth-context"
 import { FloatingLoginButton } from "./components/floating-login-button"
 
 export default function KanbanBoard() {
-  const { user, signOut } = useAuth()
-  const isAuthenticated = !!user
+  const { isAuthenticated, logout } = useAuth()
 
   const [columns, setColumns] = useState<Column[]>([
     { id: "todo", title: "To Do", tasks: [] },
@@ -357,7 +356,7 @@ export default function KanbanBoard() {
 
             <Badge variant={isAuthenticated ? "default" : "outline"} className="flex items-center gap-1">
               <Lock className="h-3 w-3" />
-              {isAuthenticated ? `${user?.email}` : "View Only"}
+              {isAuthenticated ? "Authenticated" : "View Only"}
             </Badge>
 
             <Button variant="outline" size="sm" onClick={loadTasks} disabled={loading}>
@@ -366,7 +365,7 @@ export default function KanbanBoard() {
             </Button>
 
             {isAuthenticated && (
-              <Button variant="outline" size="sm" onClick={signOut}>
+              <Button variant="outline" size="sm" onClick={logout}>
                 <LogOut className="h-3 w-3 mr-1" />
                 Logout
               </Button>

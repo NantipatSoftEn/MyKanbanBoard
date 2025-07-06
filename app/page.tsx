@@ -1,11 +1,11 @@
 "use client"
 
-import { SupabaseAuthProvider, useAuth } from "../contexts/supabase-auth-context"
-import { SupabaseAuthLogin } from "../components/supabase-auth-login"
+import { AuthProvider, useAuth } from "../contexts/auth-context"
+import { NormalLogin } from "../components/normal-login"
 import KanbanBoard from "../kanban-board"
 
 function AppContent() {
-  const { user, isLoading } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
 
   if (isLoading) {
     return (
@@ -15,8 +15,8 @@ function AppContent() {
     )
   }
 
-  if (!user) {
-    return <SupabaseAuthLogin />
+  if (!isAuthenticated) {
+    return <NormalLogin />
   }
 
   return <KanbanBoard />
@@ -24,8 +24,8 @@ function AppContent() {
 
 export default function Page() {
   return (
-    <SupabaseAuthProvider>
+    <AuthProvider>
       <AppContent />
-    </SupabaseAuthProvider>
+    </AuthProvider>
   )
 }
