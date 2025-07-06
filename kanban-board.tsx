@@ -16,6 +16,7 @@ import {
   LogIn,
   LogOut,
   User,
+  Undo2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -25,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { toast } from "@/hooks/use-toast"
 import { taskOperations, mockTasks, type Task, type Column } from "./lib/supabase"
 import { TaskDetailModal } from "./components/task-detail-modal"
 import { AuthModal } from "./components/auth-modal"
@@ -50,12 +52,13 @@ export default function KanbanBoard() {
   const [error, setError] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [usingMockData, setUsingMockData] = useState(false)
+  const [recentlyDeleted, setRecentlyDeleted] = useState<Task | null>(null)
 
   // New task form state
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
-    priority: "medium" as Task["priority"],
+    priority: "medium" as const,
     due_date: "",
     assignee: "",
   })
@@ -192,10 +195,24 @@ export default function KanbanBoard() {
     if (isConnected && !usingMockData) {
       try {
         await taskOperations.updateTaskStatus(draggedTask.id, targetColumnId as Task["status"])
+        toast({
+          title: "Task moved",
+          description: `"${draggedTask.title}" moved to ${targetColumnId === "inprogress" ? "In Progress" : targetColumnId === "todo" ? "To Do" : "Done"}`,
+        })
       } catch (err: any) {
         console.error("Error updating task:", err)
         setError("Failed to update task in database. Changes are temporary.")
+        toast({
+          title: "Error",
+          description: "Failed to update task status in database",
+          variant: "destructive",
+        })
       }
+    } else if (usingMockData) {
+      toast({
+        title: "Demo Mode",
+        description: `Task moved to ${targetColumnId === "inprogress" ? "In Progress" : targetColumnId === "todo" ? "To Do" : "Done"} (demo only)`,
+      })
     }
 
     setDraggedTask(null)
@@ -238,9 +255,19 @@ export default function KanbanBoard() {
         taskData.id = createdTask.id
         taskData.created_at = createdTask.created_at
         taskData.updated_at = createdTask.updated_at
+
+        toast({
+          title: "Task created",
+          description: `"${taskData.title}" has been added to ${columnId === "inprogress" ? "In Progress" : columnId === "todo" ? "To Do" : "Done"}`,
+        })
       } catch (err: any) {
         console.error("Error adding task:", err)
         setError("Failed to save task to database. Using temporary storage.")
+        toast({
+          title: "Error",
+          description: "Failed to save task to database",
+          variant: "destructive",
+        })
       }
     }
 
@@ -289,9 +316,19 @@ export default function KanbanBoard() {
           due_date: updatedTask.due_date,
           assignee: updatedTask.assignee,
         })
+
+        toast({
+          title: "Task updated",
+          description: `"${updatedTask.title}" has been updated`,
+        })
       } catch (err: any) {
         console.error("Error updating task:", err)
         setError("Failed to update task in database. Changes are temporary.")
+        toast({
+          title: "Error",
+          description: "Failed to update task in database",
+          variant: "destructive",
+        })
       }
     }
   }
@@ -302,7 +339,10 @@ export default function KanbanBoard() {
       return
     }
 
-    // Update local state immediately
+    // Find the task to delete for undo functionality
+    const taskToDelete = columns.flatMap((col) => col.tasks).find((task) => task.id === taskId)
+
+    // Update local state immediately (remove from UI)
     setColumns((prevColumns) =>
       prevColumns.map((column) => ({
         ...column,
@@ -310,15 +350,94 @@ export default function KanbanBoard() {
       })),
     )
 
-    // Try to delete from database if connected
+    // Try to soft delete in database if connected
     if (isConnected && !usingMockData) {
       try {
         await taskOperations.deleteTask(taskId)
+
+        if (taskToDelete) {
+          setRecentlyDeleted(taskToDelete)
+          toast({
+            title: "Task deleted",
+            description: `"${taskToDelete.title}" has been moved to trash`,
+            action: (
+              <Button variant="outline" size="sm" onClick={() => restoreTask(taskToDelete)}>
+                <Undo2 className="h-3 w-3 mr-1" />
+                Undo
+              </Button>
+            ),
+          })
+
+          // Clear recently deleted after 10 seconds
+          setTimeout(() => setRecentlyDeleted(null), 10000)
+        }
       } catch (err: any) {
         console.error("Error deleting task:", err)
         setError("Failed to delete task from database.")
+        toast({
+          title: "Error",
+          description: "Failed to delete task from database",
+          variant: "destructive",
+        })
+
+        // Restore task in UI if database operation failed
+        if (taskToDelete) {
+          setColumns((prevColumns) =>
+            prevColumns.map((column) => {
+              if (column.id === taskToDelete.status) {
+                return {
+                  ...column,
+                  tasks: [...column.tasks, taskToDelete],
+                }
+              }
+              return column
+            }),
+          )
+        }
+      }
+    } else if (taskToDelete) {
+      toast({
+        title: "Demo Mode",
+        description: `"${taskToDelete.title}" deleted (demo only)`,
+      })
+    }
+  }
+
+  const restoreTask = async (task: Task) => {
+    if (!isAuthenticated) return
+
+    // Add task back to UI immediately
+    setColumns((prevColumns) =>
+      prevColumns.map((column) => {
+        if (column.id === task.status) {
+          return {
+            ...column,
+            tasks: [...column.tasks, task],
+          }
+        }
+        return column
+      }),
+    )
+
+    // Try to restore in database if connected
+    if (isConnected && !usingMockData) {
+      try {
+        await taskOperations.restoreTask(task.id)
+        toast({
+          title: "Task restored",
+          description: `"${task.title}" has been restored`,
+        })
+      } catch (err: any) {
+        console.error("Error restoring task:", err)
+        toast({
+          title: "Error",
+          description: "Failed to restore task from database",
+          variant: "destructive",
+        })
       }
     }
+
+    setRecentlyDeleted(null)
   }
 
   const openTaskDetail = (task: Task) => {
@@ -360,7 +479,7 @@ export default function KanbanBoard() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Army Kanban Board</h1>
+          <h1 className="text-3xl font-bold text-gray-900">My Kanban Board</h1>
           <div className="flex items-center gap-3">
             <Badge
               variant={isConnected ? "default" : usingMockData ? "secondary" : "destructive"}
@@ -369,7 +488,7 @@ export default function KanbanBoard() {
               {isConnected ? (
                 <>
                   <Wifi className="h-3 w-3" />
-                  Connected
+                  Connected to Supabase
                 </>
               ) : usingMockData ? (
                 <>

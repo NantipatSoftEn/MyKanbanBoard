@@ -64,7 +64,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         <Tabs defaultValue="signin" onValueChange={resetForm}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup" disabled>Sign Up</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin" className="space-y-4">

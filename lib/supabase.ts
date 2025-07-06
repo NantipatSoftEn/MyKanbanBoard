@@ -18,6 +18,7 @@ export interface Task {
   assignee?: string | null
   position: number
   is_public?: boolean
+  deleted_at?: string | null
 }
 
 export interface Column {
@@ -195,20 +196,46 @@ export const taskOperations = {
     }
   },
 
-  // Get all public tasks and user's private tasks
+  // Get all public tasks and user's private tasks (excluding soft deleted)
   async getAllTasks(): Promise<Task[]> {
-    // This will get public tasks (is_public = true) and user's own tasks if authenticated
-    const { data, error } = await supabase.from("tasks").select("*").order("position", { ascending: true })
+    try {
+      // First, try to query with deleted_at filter
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .is("deleted_at", null)
+        .order("position", { ascending: true })
 
-    if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Database error: ${error.message}`)
+      if (error) {
+        // If error is about missing column, try without deleted_at filter
+        if (error.message.includes("deleted_at") && error.message.includes("does not exist")) {
+          console.log("deleted_at column not found, querying without soft delete filter")
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from("tasks")
+            .select("*")
+            .order("position", { ascending: true })
+
+          if (fallbackError) {
+            console.error("Supabase error:", fallbackError)
+            throw new Error(`Database error: ${fallbackError.message}`)
+          }
+          return fallbackData || []
+        }
+
+        console.error("Supabase error:", error)
+        throw new Error(`Database error: ${error.message}`)
+      }
+      return data || []
+    } catch (err: any) {
+      console.error("Supabase error:", err)
+      throw new Error(`Database error: ${err.message}`)
     }
-    return data || []
   },
 
   // Create a new task (requires authentication)
-  async createTask(task: Omit<Task, "id" | "created_at" | "updated_at" | "user_id" | "is_public">): Promise<Task> {
+  async createTask(
+    task: Omit<Task, "id" | "created_at" | "updated_at" | "user_id" | "is_public" | "deleted_at">,
+  ): Promise<Task> {
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -242,22 +269,46 @@ export const taskOperations = {
       throw new Error("Authentication required to update tasks")
     }
 
-    const { data, error } = await supabase
-      .from("tasks")
-      .update(updates)
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .select()
-      .single()
+    // Remove fields that shouldn't be updated directly
+    const { deleted_at, ...safeUpdates } = updates
 
-    if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Failed to update task: ${error.message}`)
+    try {
+      // Try with deleted_at filter first
+      let { data, error } = await supabase
+        .from("tasks")
+        .update({ ...safeUpdates, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .is("deleted_at", null)
+        .select()
+        .single()
+
+      // If deleted_at column doesn't exist, try without the filter
+      if (error && error.message.includes("deleted_at") && error.message.includes("does not exist")) {
+        const result = await supabase
+          .from("tasks")
+          .update({ ...safeUpdates, updated_at: new Date().toISOString() })
+          .eq("id", id)
+          .eq("user_id", user.id)
+          .select()
+          .single()
+
+        data = result.data
+        error = result.error
+      }
+
+      if (error) {
+        console.error("Supabase error:", error)
+        throw new Error(`Failed to update task: ${error.message}`)
+      }
+      return data
+    } catch (err: any) {
+      console.error("Supabase error:", err)
+      throw new Error(`Failed to update task: ${err.message}`)
     }
-    return data
   },
 
-  // Delete a task (requires authentication and ownership)
+  // Soft delete a task (requires authentication and ownership)
   async deleteTask(id: string): Promise<void> {
     const {
       data: { user },
@@ -267,16 +318,38 @@ export const taskOperations = {
       throw new Error("Authentication required to delete tasks")
     }
 
-    const { error } = await supabase.from("tasks").delete().eq("id", id).eq("user_id", user.id)
+    try {
+      // Try soft delete first (if deleted_at column exists)
+      let { error } = await supabase
+        .from("tasks")
+        .update({
+          deleted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .is("deleted_at", null)
 
-    if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Failed to delete task: ${error.message}`)
+      // If deleted_at column doesn't exist, fall back to hard delete
+      if (error && error.message.includes("deleted_at") && error.message.includes("does not exist")) {
+        console.log("deleted_at column not found, performing hard delete")
+        const result = await supabase.from("tasks").delete().eq("id", id).eq("user_id", user.id)
+
+        error = result.error
+      }
+
+      if (error) {
+        console.error("Supabase error:", error)
+        throw new Error(`Failed to delete task: ${error.message}`)
+      }
+    } catch (err: any) {
+      console.error("Supabase error:", err)
+      throw new Error(`Failed to delete task: ${err.message}`)
     }
   },
 
-  // Update task status (requires authentication and ownership)
-  async updateTaskStatus(id: string, status: Task["status"]): Promise<Task> {
+  // Update task status when moving between columns (requires authentication and ownership)
+  async updateTaskStatus(id: string, status: Task["status"], position?: number): Promise<Task> {
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -285,9 +358,68 @@ export const taskOperations = {
       throw new Error("Authentication required to update tasks")
     }
 
+    const updates: any = {
+      status,
+      updated_at: new Date().toISOString(),
+    }
+
+    // Update position if provided
+    if (position !== undefined) {
+      updates.position = position
+    }
+
+    try {
+      // Try with deleted_at filter first
+      let { data, error } = await supabase
+        .from("tasks")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .is("deleted_at", null)
+        .select()
+        .single()
+
+      // If deleted_at column doesn't exist, try without the filter
+      if (error && error.message.includes("deleted_at") && error.message.includes("does not exist")) {
+        const result = await supabase
+          .from("tasks")
+          .update(updates)
+          .eq("id", id)
+          .eq("user_id", user.id)
+          .select()
+          .single()
+
+        data = result.data
+        error = result.error
+      }
+
+      if (error) {
+        console.error("Supabase error:", error)
+        throw new Error(`Failed to update task status: ${error.message}`)
+      }
+      return data
+    } catch (err: any) {
+      console.error("Supabase error:", err)
+      throw new Error(`Failed to update task status: ${err.message}`)
+    }
+  },
+
+  // Restore a soft deleted task (requires authentication and ownership)
+  async restoreTask(id: string): Promise<Task> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      throw new Error("Authentication required to restore tasks")
+    }
+
     const { data, error } = await supabase
       .from("tasks")
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({
+        deleted_at: null,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", id)
       .eq("user_id", user.id)
       .select()
@@ -295,8 +427,50 @@ export const taskOperations = {
 
     if (error) {
       console.error("Supabase error:", error)
-      throw new Error(`Failed to update task status: ${error.message}`)
+      throw new Error(`Failed to restore task: ${error.message}`)
     }
     return data
+  },
+
+  // Get soft deleted tasks (for trash/recycle bin functionality)
+  async getDeletedTasks(): Promise<Task[]> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      throw new Error("Authentication required to view deleted tasks")
+    }
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", user.id)
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false })
+
+    if (error) {
+      console.error("Supabase error:", error)
+      throw new Error(`Failed to get deleted tasks: ${error.message}`)
+    }
+    return data || []
+  },
+
+  // Permanently delete a task (hard delete)
+  async permanentlyDeleteTask(id: string): Promise<void> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      throw new Error("Authentication required to permanently delete tasks")
+    }
+
+    const { error } = await supabase.from("tasks").delete().eq("id", id).eq("user_id", user.id)
+
+    if (error) {
+      console.error("Supabase error:", error)
+      throw new Error(`Failed to permanently delete task: ${error.message}`)
+    }
   },
 }
