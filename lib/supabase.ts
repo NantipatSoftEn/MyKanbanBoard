@@ -320,25 +320,19 @@ export const taskOperations = {
     }
 
     try {
-      // Try soft delete first (if deleted_at column exists)
-      let { data, error } = await supabase
+      // Perform soft delete by setting is_deleted = true
+      const { data, error } = await supabase
         .from("tasks")
         .update({
           is_deleted: true,
-          deleted_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)
         .eq("user_id", user.id)
+        .select()
+        .single()
         
       console.log("Soft deleting task:", id, data, error)
-      // If deleted_at column doesn't exist, fall back to hard delete
-      if (error && error.message.includes("deleted_at") && error.message.includes("does not exist")) {
-        console.log("deleted_at column not found, performing hard delete")
-        const result = await supabase.from("tasks").delete().eq("id", id).eq("user_id", user.id)
-
-        error = result.error
-      }
 
       if (error) {
         console.error("Supabase error:", error)
@@ -377,10 +371,10 @@ export const taskOperations = {
         .update(updates)
         .eq("id", id)
         .eq("user_id", user.id)
-        .is("deleted_at", null)
+        // .is("deleted_at", null)
         .select()
         .single()
-
+      console.log("Updating task status:", id, updates, data, error)
       // If deleted_at column doesn't exist, try without the filter
       if (error && error.message.includes("deleted_at") && error.message.includes("does not exist")) {
         const result = await supabase
