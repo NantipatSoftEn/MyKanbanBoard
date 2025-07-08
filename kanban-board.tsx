@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
+import type React from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   X,
@@ -17,42 +17,54 @@ import {
   LogOut,
   User,
   Undo2,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { toast } from "@/hooks/use-toast"
-import { taskOperations, mockTasks, type Task, type Column } from "./lib/supabase"
-import { TaskDetailModal } from "./components/task-detail-modal"
-import { AuthModal } from "./components/auth-modal"
-import { useAuth } from "./contexts/supabase-auth-context"
+  Trash2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/hooks/use-toast";
+import {
+  taskOperations,
+  mockTasks,
+  type Task,
+  type Column,
+} from "./lib/supabase";
+import { TaskDetailModal } from "./components/task-detail-modal";
+import { AuthModal } from "./components/auth-modal";
+import { useAuth } from "./contexts/supabase-auth-context";
 
 export default function KanbanBoard() {
-  const { user, signOut } = useAuth()
-  const isAuthenticated = !!user
+  const { user, signOut } = useAuth();
+  const isAuthenticated = !!user;
 
   const [columns, setColumns] = useState<Column[]>([
     { id: "todo", title: "To Do", tasks: [] },
     { id: "inprogress", title: "In Progress", tasks: [] },
     { id: "done", title: "Done", tasks: [] },
-  ])
+  ]);
 
-  const [draggedTask, setDraggedTask] = useState<Task | null>(null)
-  const [draggedFrom, setDraggedFrom] = useState<string | null>(null)
-  const [showAddTask, setShowAddTask] = useState<string | null>(null)
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
-  const [usingMockData, setUsingMockData] = useState(false)
-  const [recentlyDeleted, setRecentlyDeleted] = useState<Task | null>(null)
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+  const [draggedFrom, setDraggedFrom] = useState<string | null>(null);
+  const [showAddTask, setShowAddTask] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [usingMockData, setUsingMockData] = useState(false);
+  const [recentlyDeleted, setRecentlyDeleted] = useState<Task | null>(null);
 
   // New task form state
   const [newTask, setNewTask] = useState({
@@ -61,116 +73,118 @@ export default function KanbanBoard() {
     priority: "medium" as Task["priority"],
     due_date: "",
     assignee: "",
-  })
+  });
 
   // Load tasks on component mount and when user changes
   useEffect(() => {
-    loadTasks()
-  }, []) // Remove user dependency for initial load
+    loadTasks();
+  }, []); // Remove user dependency for initial load
 
   // Reload when user logs in/out to show their personal tasks vs all tasks
   useEffect(() => {
     if (user !== null) {
-      loadTasks()
+      loadTasks();
     }
-  }, [user])
+  }, [user]);
 
   const loadTasks = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
       // Always try to load from database first, regardless of auth status
-      const tableExists = await taskOperations.checkTableExists()
+      const tableExists = await taskOperations.checkTableExists();
 
       if (tableExists) {
         try {
-          const tasks = await taskOperations.getAllTasks()
-          setIsConnected(true)
-          setUsingMockData(false)
+          const tasks = await taskOperations.getAllTasks();
+          setIsConnected(true);
+          setUsingMockData(false);
 
           // Group tasks by status
-          const groupedTasks = tasks.reduce(
-            (acc, task) => {
-              if (!acc[task.status]) acc[task.status] = []
-              acc[task.status].push(task)
-              return acc
-            },
-            {} as Record<string, Task[]>,
-          )
+          const groupedTasks = tasks.reduce((acc, task) => {
+            if (!acc[task.status]) acc[task.status] = [];
+            acc[task.status].push(task);
+            return acc;
+          }, {} as Record<string, Task[]>);
 
           setColumns((prev) =>
             prev.map((column) => ({
               ...column,
               tasks: groupedTasks[column.id] || [],
-            })),
-          )
+            }))
+          );
         } catch (dbError: any) {
-          console.error("Database error, falling back to mock data:", dbError)
-          loadMockData()
+          console.error("Database error, falling back to mock data:", dbError);
+          loadMockData();
         }
       } else {
         // Table doesn't exist, use mock data
-        setError("Database table not found. Showing demo data.")
-        loadMockData()
+        setError("Database table not found. Showing demo data.");
+        loadMockData();
       }
     } catch (err: any) {
-      console.error("Error loading tasks:", err)
-      setError(`Failed to connect to database: ${err.message}`)
-      setIsConnected(false)
+      console.error("Error loading tasks:", err);
+      setError(`Failed to connect to database: ${err.message}`);
+      setIsConnected(false);
       // Always fall back to mock data so users can see the board
-      loadMockData()
+      loadMockData();
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadMockData = () => {
-    setUsingMockData(true)
+    setUsingMockData(true);
 
     // Group mock tasks by status
-    const groupedTasks = mockTasks.reduce(
-      (acc, task) => {
-        if (!acc[task.status]) acc[task.status] = []
-        acc[task.status].push(task)
-        return acc
-      },
-      {} as Record<string, Task[]>,
-    )
+    const groupedTasks = mockTasks.reduce((acc, task) => {
+      if (!acc[task.status]) acc[task.status] = [];
+      acc[task.status].push(task);
+      return acc;
+    }, {} as Record<string, Task[]>);
 
     setColumns((prev) =>
       prev.map((column) => ({
         ...column,
         tasks: groupedTasks[column.id] || [],
-      })),
-    )
-  }
+      }))
+    );
+  };
 
   const handleDragStart = (task: Task, columnId: string) => {
     if (!isAuthenticated) {
       // Don't show modal immediately, just prevent drag
-      return
+      return;
     }
-    setDraggedTask(task)
-    setDraggedFrom(columnId)
-  }
+    setDraggedTask(task);
+    setDraggedFrom(columnId);
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
-    if (!isAuthenticated) return
-    e.preventDefault()
-  }
+    if (!isAuthenticated) return;
+    e.preventDefault();
+  };
 
   const handleDrop = async (e: React.DragEvent, targetColumnId: string) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!isAuthenticated || !draggedTask || !draggedFrom || draggedFrom === targetColumnId) {
-      setDraggedTask(null)
-      setDraggedFrom(null)
-      return
+    if (
+      !isAuthenticated ||
+      !draggedTask ||
+      !draggedFrom ||
+      draggedFrom === targetColumnId
+    ) {
+      setDraggedTask(null);
+      setDraggedFrom(null);
+      return;
     }
 
     // Update local state immediately for better UX
-    const updatedTask = { ...draggedTask, status: targetColumnId as Task["status"] }
+    const updatedTask = {
+      ...draggedTask,
+      status: targetColumnId as Task["status"],
+    };
 
     setColumns((prevColumns) => {
       const newColumns = prevColumns.map((column) => {
@@ -178,54 +192,69 @@ export default function KanbanBoard() {
           return {
             ...column,
             tasks: column.tasks.filter((task) => task.id !== draggedTask.id),
-          }
+          };
         }
         if (column.id === targetColumnId) {
           return {
             ...column,
             tasks: [...column.tasks, updatedTask],
-          }
+          };
         }
-        return column
-      })
-      return newColumns
-    })
+        return column;
+      });
+      return newColumns;
+    });
 
     // Try to update in database if connected
     if (isConnected && !usingMockData) {
       try {
-        await taskOperations.updateTaskStatus(draggedTask.id, targetColumnId as Task["status"])
+        await taskOperations.updateTaskStatus(
+          draggedTask.id,
+          targetColumnId as Task["status"]
+        );
         toast({
           title: "Task moved",
-          description: `"${draggedTask.title}" moved to ${targetColumnId === "inprogress" ? "In Progress" : targetColumnId === "todo" ? "To Do" : "Done"}`,
-        })
+          description: `"${draggedTask.title}" moved to ${
+            targetColumnId === "inprogress"
+              ? "In Progress"
+              : targetColumnId === "todo"
+              ? "To Do"
+              : "Done"
+          }`,
+        });
       } catch (err: any) {
-        console.error("Error updating task:", err)
-        setError("Failed to update task in database. Changes are temporary.")
+        console.error("Error updating task:", err);
+        setError("Failed to update task in database. Changes are temporary.");
         toast({
           title: "Error",
           description: "Failed to update task status in database",
           variant: "destructive",
-        })
+        });
       }
     } else if (usingMockData) {
       toast({
         title: "Demo Mode",
-        description: `Task moved to ${targetColumnId === "inprogress" ? "In Progress" : targetColumnId === "todo" ? "To Do" : "Done"} (demo only)`,
-      })
+        description: `Task moved to ${
+          targetColumnId === "inprogress"
+            ? "In Progress"
+            : targetColumnId === "todo"
+            ? "To Do"
+            : "Done"
+        } (demo only)`,
+      });
     }
 
-    setDraggedTask(null)
-    setDraggedFrom(null)
-  }
+    setDraggedTask(null);
+    setDraggedFrom(null);
+  };
 
   const addTask = async (columnId: string) => {
     if (!isAuthenticated) {
-      setIsAuthModalOpen(true)
-      return
+      setIsAuthModalOpen(true);
+      return;
     }
 
-    if (!newTask.title.trim()) return
+    if (!newTask.title.trim()) return;
 
     const taskData: Task = {
       id: `temp-${Date.now()}`, // Temporary ID for mock data
@@ -238,7 +267,7 @@ export default function KanbanBoard() {
       position: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }
+    };
 
     // Try to create in database if connected
     if (isConnected && !usingMockData) {
@@ -251,32 +280,40 @@ export default function KanbanBoard() {
           due_date: taskData.due_date,
           assignee: taskData.assignee,
           position: taskData.position,
-        })
-        taskData.id = createdTask.id
-        taskData.created_at = createdTask.created_at
-        taskData.updated_at = createdTask.updated_at
+        });
+        taskData.id = createdTask.id;
+        taskData.created_at = createdTask.created_at;
+        taskData.updated_at = createdTask.updated_at;
 
         toast({
           title: "Task created",
-          description: `"${taskData.title}" has been added to ${columnId === "inprogress" ? "In Progress" : columnId === "todo" ? "To Do" : "Done"}`,
-        })
+          description: `"${taskData.title}" has been added to ${
+            columnId === "inprogress"
+              ? "In Progress"
+              : columnId === "todo"
+              ? "To Do"
+              : "Done"
+          }`,
+        });
       } catch (err: any) {
-        console.error("Error adding task:", err)
-        setError("Failed to save task to database. Using temporary storage.")
+        console.error("Error adding task:", err);
+        setError("Failed to save task to database. Using temporary storage.");
         toast({
           title: "Error",
           description: "Failed to save task to database",
           variant: "destructive",
-        })
+        });
       }
     }
 
     // Update local state
     setColumns((prevColumns) =>
       prevColumns.map((column) =>
-        column.id === columnId ? { ...column, tasks: [...column.tasks, taskData] } : column,
-      ),
-    )
+        column.id === columnId
+          ? { ...column, tasks: [...column.tasks, taskData] }
+          : column
+      )
+    );
 
     // Reset form
     setNewTask({
@@ -285,25 +322,27 @@ export default function KanbanBoard() {
       priority: "medium",
       due_date: "",
       assignee: "",
-    })
-    setShowAddTask(null)
-  }
+    });
+    setShowAddTask(null);
+  };
 
   const updateTask = async (updatedTask: Task) => {
     if (!isAuthenticated) {
-      setIsAuthModalOpen(true)
-      return
+      setIsAuthModalOpen(true);
+      return;
     }
 
     // Update local state immediately
     setColumns((prevColumns) =>
       prevColumns.map((column) => ({
         ...column,
-        tasks: column.tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
-      })),
-    )
+        tasks: column.tasks.map((task) =>
+          task.id === updatedTask.id ? updatedTask : task
+        ),
+      }))
+    );
 
-    setSelectedTask(updatedTask)
+    setSelectedTask(updatedTask);
 
     // Try to update in database if connected
     if (isConnected && !usingMockData) {
@@ -315,96 +354,34 @@ export default function KanbanBoard() {
           priority: updatedTask.priority,
           due_date: updatedTask.due_date,
           assignee: updatedTask.assignee,
-        })
+        });
 
         toast({
           title: "Task updated",
           description: `"${updatedTask.title}" has been updated`,
-        })
+        });
       } catch (err: any) {
-        console.error("Error updating task:", err)
-        setError("Failed to update task in database. Changes are temporary.")
+        console.error("Error updating task:", err);
+        setError("Failed to update task in database. Changes are temporary.");
         toast({
           title: "Error",
           description: "Failed to update task in database",
           variant: "destructive",
-        })
+        });
       }
     }
-  }
+  };
 
-  const deleteTask = async (taskId: string) => {
+  const deleteTask = async (task: Task) => {
     if (!isAuthenticated) {
-      setIsAuthModalOpen(true)
-      return
+      setIsAuthModalOpen(true);
+      return;
     }
-
-    // Find the task to delete for undo functionality
-    const taskToDelete = columns.flatMap((col) => col.tasks).find((task) => task.id === taskId)
-
-    // Update local state immediately (remove from UI)
-    setColumns((prevColumns) =>
-      prevColumns.map((column) => ({
-        ...column,
-        tasks: column.tasks.filter((task) => task.id !== taskId),
-      })),
-    )
-
-    // Try to soft delete in database if connected
-    if (isConnected && !usingMockData) {
-      try {
-        await taskOperations.deleteTask(taskId)
-
-        if (taskToDelete) {
-          setRecentlyDeleted(taskToDelete)
-          toast({
-            title: "Task deleted",
-            description: `"${taskToDelete.title}" has been moved to trash`,
-            action: (
-              <Button variant="outline" size="sm" onClick={() => restoreTask(taskToDelete)}>
-                <Undo2 className="h-3 w-3 mr-1" />
-                Undo
-              </Button>
-            ),
-          })
-
-          // Clear recently deleted after 10 seconds
-          setTimeout(() => setRecentlyDeleted(null), 10000)
-        }
-      } catch (err: any) {
-        console.error("Error deleting task:", err)
-        setError("Failed to delete task from database.")
-        toast({
-          title: "Error",
-          description: "Failed to delete task from database",
-          variant: "destructive",
-        })
-
-        // Restore task in UI if database operation failed
-        if (taskToDelete) {
-          setColumns((prevColumns) =>
-            prevColumns.map((column) => {
-              if (column.id === taskToDelete.status) {
-                return {
-                  ...column,
-                  tasks: [...column.tasks, taskToDelete],
-                }
-              }
-              return column
-            }),
-          )
-        }
-      }
-    } else if (taskToDelete) {
-      toast({
-        title: "Demo Mode",
-        description: `"${taskToDelete.title}" deleted (demo only)`,
-      })
-    }
-  }
+    taskOperations.deleteTask(task)
+  };
 
   const restoreTask = async (task: Task) => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated) return;
 
     // Add task back to UI immediately
     setColumns((prevColumns) =>
@@ -413,56 +390,56 @@ export default function KanbanBoard() {
           return {
             ...column,
             tasks: [...column.tasks, task],
-          }
+          };
         }
-        return column
-      }),
-    )
+        return column;
+      })
+    );
 
     // Try to restore in database if connected
     if (isConnected && !usingMockData) {
       try {
-        await taskOperations.restoreTask(task.id)
+        await taskOperations.restoreTask(task.id);
         toast({
           title: "Task restored",
           description: `"${task.title}" has been restored`,
-        })
+        });
       } catch (err: any) {
-        console.error("Error restoring task:", err)
+        console.error("Error restoring task:", err);
         toast({
           title: "Error",
           description: "Failed to restore task from database",
           variant: "destructive",
-        })
+        });
       }
     }
 
-    setRecentlyDeleted(null)
-  }
+    setRecentlyDeleted(null);
+  };
 
   const openTaskDetail = (task: Task) => {
-    setSelectedTask(task)
-    setIsDetailModalOpen(true)
-  }
+    setSelectedTask(task);
+    setIsDetailModalOpen(true);
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-100 text-red-800 border-red-200";
       case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "low":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const handleTaskClick = (task: Task) => {
     if (!isAuthenticated) {
-      setIsAuthModalOpen(true)
+      setIsAuthModalOpen(true);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -472,7 +449,7 @@ export default function KanbanBoard() {
           <div className="text-lg">Loading your tasks...</div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -482,7 +459,13 @@ export default function KanbanBoard() {
           <h1 className="text-3xl font-bold text-gray-900">My Kanban Board</h1>
           <div className="flex items-center gap-3">
             <Badge
-              variant={isConnected ? "default" : usingMockData ? "secondary" : "destructive"}
+              variant={
+                isConnected
+                  ? "default"
+                  : usingMockData
+                  ? "secondary"
+                  : "destructive"
+              }
               className="flex items-center gap-1"
             >
               {isConnected ? (
@@ -515,8 +498,15 @@ export default function KanbanBoard() {
               </Badge>
             )}
 
-            <Button variant="outline" size="sm" onClick={loadTasks} disabled={loading}>
-              <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadTasks}
+              disabled={loading}
+            >
+              <RefreshCw
+                className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`}
+              />
               Refresh
             </Button>
 
@@ -526,7 +516,11 @@ export default function KanbanBoard() {
                 Logout
               </Button>
             ) : (
-              <Button variant="outline" size="sm" onClick={() => setIsAuthModalOpen(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
                 <LogIn className="h-3 w-3 mr-1" />
                 Login
               </Button>
@@ -540,7 +534,8 @@ export default function KanbanBoard() {
             <AlertDescription className="text-blue-800">
               <div className="font-medium">View-Only Mode</div>
               <div className="text-sm mt-1">
-                You're viewing the board in read-only mode. Login to create, edit, or move tasks.
+                You're viewing the board in read-only mode. Login to create,
+                edit, or move tasks.
               </div>
             </AlertDescription>
           </Alert>
@@ -552,9 +547,11 @@ export default function KanbanBoard() {
             <AlertDescription className="text-orange-800">
               <div className="font-medium">Database Connection Issue</div>
               <div className="text-sm mt-1">{error}</div>
-              {error.includes("table not found") || error.includes("does not exist") ? (
+              {error.includes("table not found") ||
+              error.includes("does not exist") ? (
                 <div className="text-sm mt-2">
-                  <strong>Solution:</strong> Run the SQL script in your Supabase dashboard to create the tasks table.
+                  <strong>Solution:</strong> Run the SQL script in your Supabase
+                  dashboard to create the tasks table.
                 </div>
               ) : null}
             </AlertDescription>
@@ -570,19 +567,25 @@ export default function KanbanBoard() {
               onDrop={(e) => handleDrop(e, column.id)}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-700 text-lg">{column.title}</h2>
+                <h2 className="font-semibold text-gray-700 text-lg">
+                  {column.title}
+                </h2>
                 <Badge variant="secondary" className="text-xs">
                   {column.tasks.length}
                 </Badge>
               </div>
 
               <div className="space-y-3">
-                {column.tasks.map((task) => (
+                {column.tasks.map((task:Task) => (
                   <Card
                     key={task.id}
                     className={`${
-                      isAuthenticated ? "cursor-move hover:shadow-md" : "cursor-default hover:shadow-sm"
-                    } transition-shadow bg-white ${!isAuthenticated ? "opacity-95" : ""}`}
+                      isAuthenticated
+                        ? "cursor-move hover:shadow-md"
+                        : "cursor-default hover:shadow-sm"
+                    } transition-shadow bg-white ${
+                      !isAuthenticated ? "opacity-95" : ""
+                    }`}
                     draggable={isAuthenticated}
                     onDragStart={() => handleDragStart(task, column.id)}
                     onClick={() => !isAuthenticated && handleTaskClick(task)}
@@ -590,8 +593,16 @@ export default function KanbanBoard() {
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2 flex-1">
-                          <GripVertical className={`h-4 w-4 ${isAuthenticated ? "text-gray-400" : "text-gray-300"}`} />
-                          <h3 className="font-medium text-sm leading-tight">{task.title}</h3>
+                          <GripVertical
+                            className={`h-4 w-4 ${
+                              isAuthenticated
+                                ? "text-gray-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                          <h3 className="font-medium text-sm leading-tight">
+                            {task.title}
+                          </h3>
                         </div>
                         <div className="flex gap-1">
                           <Button
@@ -603,13 +614,22 @@ export default function KanbanBoard() {
                             <Eye className="h-3 w-3 text-blue-500" />
                           </Button>
                           {isAuthenticated ? (
+                            // <Button
+                            //   variant="ghost"
+                            //   size="sm"
+                            //   className="h-6 w-6 p-0 hover:bg-red-100"
+                            //   onClick={() => deleteTask(task.id)}
+                            // >
+                            //   <X className="h-3 w-3 text-red-500" />
+                            // </Button>
+
                             <Button
                               variant="ghost"
                               size="sm"
                               className="h-6 w-6 p-0 hover:bg-red-100"
-                              onClick={() => deleteTask(task.id)}
+                              onClick={() =>   deleteTask(task)}
                             >
-                              <X className="h-3 w-3 text-red-500" />
+                              <Trash2 className="h-3 w-3 text-red-500" />
                             </Button>
                           ) : (
                             <Button
@@ -626,17 +646,30 @@ export default function KanbanBoard() {
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="flex items-center justify-between">
-                        <Badge variant="outline" className={`text-xs ${getPriorityColor(task.priority)}`}>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${getPriorityColor(
+                            task.priority
+                          )}`}
+                        >
                           {task.priority}
                         </Badge>
                         {task.due_date && (
-                          <span className="text-xs text-gray-500">{new Date(task.due_date).toLocaleDateString()}</span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(task.due_date).toLocaleDateString()}
+                          </span>
                         )}
                       </div>
                       {task.description && (
-                        <p className="text-xs text-gray-600 mt-2 line-clamp-2">{task.description}</p>
+                        <p className="text-xs text-gray-600 mt-2 line-clamp-2">
+                          {task.description}
+                        </p>
                       )}
-                      {task.assignee && <p className="text-xs text-blue-600 mt-1">@{task.assignee}</p>}
+                      {task.assignee && (
+                        <p className="text-xs text-blue-600 mt-1">
+                          @{task.assignee}
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -652,20 +685,27 @@ export default function KanbanBoard() {
                       id="title"
                       placeholder="Enter task title..."
                       value={newTask.title}
-                      onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, title: e.target.value })
+                      }
                       autoFocus
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="description" className="text-sm font-medium">
+                    <Label
+                      htmlFor="description"
+                      className="text-sm font-medium"
+                    >
                       Description
                     </Label>
                     <Textarea
                       id="description"
                       placeholder="Add a description..."
                       value={newTask.description}
-                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, description: e.target.value })
+                      }
                       rows={2}
                     />
                   </div>
@@ -700,7 +740,9 @@ export default function KanbanBoard() {
                         id="due_date"
                         type="date"
                         value={newTask.due_date}
-                        onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
+                        onChange={(e) =>
+                          setNewTask({ ...newTask, due_date: e.target.value })
+                        }
                       />
                     </div>
                   </div>
@@ -713,7 +755,9 @@ export default function KanbanBoard() {
                       id="assignee"
                       placeholder="Assign to..."
                       value={newTask.assignee}
-                      onChange={(e) => setNewTask({ ...newTask, assignee: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, assignee: e.target.value })
+                      }
                     />
                   </div>
 
@@ -730,14 +774,14 @@ export default function KanbanBoard() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        setShowAddTask(null)
+                        setShowAddTask(null);
                         setNewTask({
                           title: "",
                           description: "",
                           priority: "medium",
                           due_date: "",
                           assignee: "",
-                        })
+                        });
                       }}
                     >
                       Cancel
@@ -768,19 +812,22 @@ export default function KanbanBoard() {
         </div>
       </div>
 
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
 
       <TaskDetailModal
         task={selectedTask}
         isOpen={isDetailModalOpen}
         onClose={() => {
-          setIsDetailModalOpen(false)
-          setSelectedTask(null)
+          setIsDetailModalOpen(false);
+          setSelectedTask(null);
         }}
         onSave={updateTask}
         onDelete={deleteTask}
         readOnly={!isAuthenticated}
       />
     </div>
-  )
+  );
 }

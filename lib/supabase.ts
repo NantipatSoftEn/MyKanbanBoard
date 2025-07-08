@@ -1,31 +1,31 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export interface Task {
-  id: string
-  user_id?: string
-  title: string
-  description?: string | null
-  status: "todo" | "inprogress" | "done"
-  priority: "low" | "medium" | "high"
-  created_at: string
-  updated_at: string
-  due_date?: string | null
-  assignee?: string | null
-  position: number
-  is_public?: boolean
-  deleted_at?: string | null
-  is_deleted?: boolean
+  id: string;
+  user_id?: string;
+  title: string;
+  description?: string | null;
+  status: "todo" | "inprogress" | "done";
+  priority: "low" | "medium" | "high";
+  created_at: string;
+  updated_at: string;
+  due_date?: string | null;
+  assignee?: string | null;
+  position: number;
+  is_public?: boolean;
+  deleted_at?: string | null;
+  is_deleted?: boolean;
 }
 
 export interface Column {
-  id: string
-  title: string
-  tasks: Task[]
+  id: string;
+  title: string;
+  tasks: Task[];
 }
 
 // Mock data for fallback (same as database mock data)
@@ -39,7 +39,9 @@ export const mockTasks: Task[] = [
     priority: "high",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "John Doe",
     position: 1,
     is_deleted: false,
@@ -53,7 +55,9 @@ export const mockTasks: Task[] = [
     priority: "medium",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "Jane Smith",
     position: 2,
     is_deleted: false,
@@ -67,7 +71,9 @@ export const mockTasks: Task[] = [
     priority: "low",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "Alex Johnson",
     position: 3,
     is_deleted: false,
@@ -75,12 +81,15 @@ export const mockTasks: Task[] = [
   {
     id: "mock-4",
     title: "Implement search functionality",
-    description: "Add global search feature with filters, sorting, and real-time results across all content types",
+    description:
+      "Add global search feature with filters, sorting, and real-time results across all content types",
     status: "todo",
     priority: "medium",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "Sarah Wilson",
     position: 4,
     is_deleted: false,
@@ -94,7 +103,9 @@ export const mockTasks: Task[] = [
     priority: "high",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: null,
     position: 5,
     is_deleted: false,
@@ -108,7 +119,9 @@ export const mockTasks: Task[] = [
     priority: "high",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "Mike Johnson",
     position: 1,
     is_deleted: false,
@@ -122,7 +135,9 @@ export const mockTasks: Task[] = [
     priority: "medium",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "Sarah Wilson",
     position: 2,
     is_deleted: false,
@@ -136,7 +151,9 @@ export const mockTasks: Task[] = [
     priority: "medium",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "David Chen",
     position: 3,
     is_deleted: false,
@@ -144,12 +161,15 @@ export const mockTasks: Task[] = [
   {
     id: "mock-9",
     title: "Mobile app development",
-    description: "Develop React Native mobile application with core features and offline synchronization capabilities",
+    description:
+      "Develop React Native mobile application with core features and offline synchronization capabilities",
     status: "inprogress",
     priority: "high",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "Emily Rodriguez",
     position: 4,
     is_deleted: false,
@@ -163,7 +183,9 @@ export const mockTasks: Task[] = [
     priority: "low",
     created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "John Doe",
     position: 1,
     is_deleted: false,
@@ -177,7 +199,9 @@ export const mockTasks: Task[] = [
     priority: "medium",
     created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    due_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "Jane Smith",
     position: 2,
     is_deleted: false,
@@ -185,113 +209,126 @@ export const mockTasks: Task[] = [
   {
     id: "mock-12",
     title: "Setup authentication system",
-    description: "Implement user authentication with email/password, social login, and secure session management",
+    description:
+      "Implement user authentication with email/password, social login, and secure session management",
     status: "done",
     priority: "high",
     created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    due_date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    due_date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     assignee: "Mike Johnson",
     position: 3,
     is_deleted: false,
   },
-]
+];
 
 // Database operations with user authentication
 export const taskOperations = {
   // Check if the tasks table exists
   async checkTableExists(): Promise<boolean> {
     try {
-      const { error } = await supabase.from("tasks").select("count").limit(1)
-      return !error
+      const { error } = await supabase.from("tasks").select("count").limit(1);
+      return !error;
     } catch {
-      return false
+      return false;
     }
   },
 
   // Check if soft delete columns exist
-  async checkSoftDeleteColumns(): Promise<boolean> {
-    try {
-      const { error } = await supabase.from("tasks").select("is_deleted").limit(1)
-      return !error
-    } catch {
-      return false
-    }
+  async findTask(id: string): Promise<any> {
+    console.log("Finding task with ID:", id);
+    const query  =  supabase
+      .from("tasks")
+      .select("*")
+      .eq("id", id)
+  
+    console.log("Query:", query);
+    const { data, error } = await query
+    console.log("Data:", data);
+    return data;
   },
 
   // Get all public tasks and user's private tasks (excluding soft deleted)
   async getAllTasks(): Promise<Task[]> {
     try {
       // Check if soft delete columns exist
-      const hasSoftDelete = await this.checkSoftDeleteColumns()
 
-      let query = supabase.from("tasks").select("*").order("position", { ascending: true })
+      let query = supabase
+        .from("tasks")
+        .select("*")
+        .is("deleted_at", null) // Exclude soft deleted tasks
+        .order("position", { ascending: true });
 
-      // Only filter by is_deleted if the column exists
-      if (hasSoftDelete) {
-        query = query.eq("is_deleted", false)
-      }
-
-      const { data, error } = await query
+      const { data, error } = await query;
 
       if (error) {
-        console.error("Supabase error:", error)
-        throw new Error(`Database error: ${error.message}`)
+        console.error("Supabase error:", error);
+        throw new Error(`Database error: ${error.message}`);
       }
-      return data || []
+      return data || [];
     } catch (err: any) {
-      console.error("Supabase error:", err)
-      throw new Error(`Database error: ${err.message}`)
+      console.error("Supabase error:", err);
+      throw new Error(`Database error: ${err.message}`);
     }
   },
 
   // Create a new task (requires authentication)
   async createTask(
-    task: Omit<Task, "id" | "created_at" | "updated_at" | "user_id" | "is_public" | "deleted_at" | "is_deleted">,
+    task: Omit<
+      Task,
+      | "id"
+      | "created_at"
+      | "updated_at"
+      | "user_id"
+      | "is_public"
+      | "deleted_at"
+    >
   ): Promise<Task> {
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("Authentication required to create tasks")
+      throw new Error("Authentication required to create tasks");
     }
 
     // Check if soft delete columns exist
-    const hasSoftDelete = await this.checkSoftDeleteColumns()
 
     const taskWithUser: any = {
       ...task,
       user_id: user.id,
       is_public: false, // User tasks are private by default
-    }
+    };
 
     // Only add is_deleted if the column exists
-    if (hasSoftDelete) {
-      taskWithUser.is_deleted = false
-    }
 
-    const { data, error } = await supabase.from("tasks").insert([taskWithUser]).select().single()
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert([taskWithUser])
+      .select()
+      .single();
 
     if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Failed to create task: ${error.message}`)
+      console.error("Supabase error:", error);
+      throw new Error(`Failed to create task: ${error.message}`);
     }
-    return data
+    return data;
   },
 
   // Update a task (requires authentication and ownership)
   async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("Authentication required to update tasks")
+      throw new Error("Authentication required to update tasks");
     }
 
     // Remove fields that shouldn't be updated directly
-    const { deleted_at, is_deleted, ...safeUpdates } = updates
+    const { deleted_at, ...safeUpdates } = updates;
 
     const { data, error } = await supabase
       .from("tasks")
@@ -299,91 +336,70 @@ export const taskOperations = {
       .eq("id", id)
       .eq("user_id", user.id)
       .select()
-      .single()
+      .single();
 
     if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Failed to update task: ${error.message}`)
+      console.error("Supabase error:", error);
+      throw new Error(`Failed to update task: ${error.message}`);
     }
-    return data
+    return data;
   },
 
-  // Soft delete a task - ONLY sets is_deleted = true (requires authentication and ownership)
-  async deleteTask(id: string): Promise<void> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+  // Soft delete a task - sets is_deleted = true and deleted_at (requires authentication and ownership)
+  async deleteTask(task: Task): Promise<void> {
+    // Assuming you have already initialized your Supabase client
 
-    if (!user) {
-      throw new Error("Authentication required to delete tasks")
-    }
 
-    console.log(`Attempting to soft delete task ${id} for user ${user.id}`)
+    // Define the type for your task (adjust according to your actual schema)
+    type Task = {
+      id: string;
+      user_id: string;
+   
+      // Add other fields as needed
+    };
 
-    try {
-      // Check if soft delete columns exist
-      const hasSoftDelete = await this.checkSoftDeleteColumns()
+    const _task = await this.findTask(task.id);
+    console.log("find task:", _task);
+    // Execute the update query
+    const { data, error } = await supabase
+      .from("tasks")
+      .update({ deleted_at: new Date().toISOString()})
+      .eq("id", task.id)
+      .select();
 
-      if (hasSoftDelete) {
-        // Perform soft delete by ONLY setting is_deleted = true
-        // Remove .select().single() to avoid the "multiple rows" error
-        const { error } = await supabase
-          .from("tasks")
-          .update({
-            is_deleted: true,
-            deleted_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", id)
-          .eq("user_id", user.id)
-
-        console.log("Soft delete result:", { error })
-
-        if (error) {
-          console.error("Supabase soft delete error:", error)
-          throw new Error(`Failed to delete task: ${error.message}`)
-        }
-
-        console.log(`Successfully soft deleted task ${id}`)
-      } else {
-        // Fall back to hard delete if soft delete columns don't exist
-        console.log("Soft delete columns not found, performing hard delete")
-        const { error } = await supabase.from("tasks").delete().eq("id", id).eq("user_id", user.id)
-
-        if (error) {
-          console.error("Supabase hard delete error:", error)
-          throw new Error(`Failed to delete task: ${error.message}`)
-        }
-
-        console.log(`Successfully hard deleted task ${id}`)
-      }
-    } catch (err: any) {
-      console.error("Delete task error:", err)
-      throw new Error(`Failed to delete task: ${err.message}`)
+    // Handle the result
+    if (error) {
+      console.error("Error updating task:", error);
+    } else {
+      console.log("Updated task:", data);
     }
   },
 
   // Update task status when moving between columns (requires authentication and ownership)
-  async updateTaskStatus(id: string, status: Task["status"], position?: number): Promise<Task> {
+  async updateTaskStatus(
+    id: string,
+    status: Task["status"],
+    position?: number
+  ): Promise<Task> {
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("Authentication required to update tasks")
+      throw new Error("Authentication required to update tasks");
     }
 
     const updates: any = {
       status,
       updated_at: new Date().toISOString(),
-    }
+    };
 
     // Update position if provided
     if (position !== undefined) {
-      updates.position = position
+      updates.position = position;
     }
 
-    console.log(`Updating task status for ${id}:`, updates)
+    console.log(`Updating task status for ${id}:`, updates);
 
     const { data, error } = await supabase
       .from("tasks")
@@ -391,25 +407,25 @@ export const taskOperations = {
       .eq("id", id)
       .eq("user_id", user.id)
       .select()
-      .single()
+      .single();
 
-    console.log("Update task status result:", { data, error })
+    console.log("Update task status result:", { data, error });
 
     if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Failed to update task status: ${error.message}`)
+      console.error("Supabase error:", error);
+      throw new Error(`Failed to update task status: ${error.message}`);
     }
-    return data
+    return data;
   },
 
   // Restore a soft deleted task (requires authentication and ownership)
   async restoreTask(id: string): Promise<Task> {
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("Authentication required to restore tasks")
+      throw new Error("Authentication required to restore tasks");
     }
 
     const { data, error } = await supabase
@@ -422,61 +438,34 @@ export const taskOperations = {
       .eq("id", id)
       .eq("user_id", user.id)
       .select()
-      .single()
+      .single();
 
     if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Failed to restore task: ${error.message}`)
+      console.error("Supabase error:", error);
+      throw new Error(`Failed to restore task: ${error.message}`);
     }
-    return data
-  },
-
-  // Get soft deleted tasks (for trash/recycle bin functionality)
-  async getDeletedTasks(): Promise<Task[]> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error("Authentication required to view deleted tasks")
-    }
-
-    // Check if soft delete columns exist
-    const hasSoftDelete = await this.checkSoftDeleteColumns()
-
-    if (!hasSoftDelete) {
-      return [] // Return empty array if soft delete not supported
-    }
-
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("is_deleted", true)
-      .order("deleted_at", { ascending: false })
-
-    if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Failed to get deleted tasks: ${error.message}`)
-    }
-    return data || []
+    return data;
   },
 
   // Permanently delete a task (hard delete)
   async permanentlyDeleteTask(id: string): Promise<void> {
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("Authentication required to permanently delete tasks")
+      throw new Error("Authentication required to permanently delete tasks");
     }
 
-    const { error } = await supabase.from("tasks").delete().eq("id", id).eq("user_id", user.id)
+    const { error } = await supabase
+      .from("tasks")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
 
     if (error) {
-      console.error("Supabase error:", error)
-      throw new Error(`Failed to permanently delete task: ${error.message}`)
+      console.error("Supabase error:", error);
+      throw new Error(`Failed to permanently delete task: ${error.message}`);
     }
   },
-}
+};

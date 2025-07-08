@@ -16,7 +16,7 @@ interface TaskDetailModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (task: Task) => void
-  onDelete: (taskId: string) => void
+  onDelete: (task: Task) => void
   readOnly?: boolean
 }
 
@@ -40,7 +40,7 @@ export function TaskDetailModal({ task, isOpen, onClose, onSave, onDelete, readO
 
   const handleDelete = () => {
     if (confirm("Are you sure you want to delete this task?")) {
-      onDelete(task.id)
+      onDelete(task)
       onClose()
     }
   }
