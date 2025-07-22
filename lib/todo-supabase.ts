@@ -1,27 +1,16 @@
 import { supabase } from "./supabase"
+import type { Database, Tables, TablesInsert, TablesUpdate } from './database.types'
 
 // Re-export the shared supabase client for backward compatibility
 export { supabase }
 
-export interface Todo {
-  id: string
-  user_id: string | null
-  title: string
-  description?: string | null
-  completed: boolean
-  created_at: string
-  updated_at: string
-  is_public?: boolean // Make optional for backward compatibility
-  tags?: string[] // Add tags support
-}
-
-export interface TodoTag {
-  id: string
-  name: string
-  color: string
-  icon?: string
-  created_at: string
-}
+// Use the generated database types
+export type Todo = Tables<'todos'>
+export type TodoInsert = TablesInsert<'todos'>
+export type TodoUpdate = TablesUpdate<'todos'>
+export type TodoTag = Tables<'todo_tags'>
+export type TodoTagInsert = TablesInsert<'todo_tags'>
+export type TodoTagUpdate = TablesUpdate<'todo_tags'>
 
 export interface TodoFilters {
   search?: string
@@ -205,9 +194,9 @@ export const todoOperations = {
   // Create a new todo (requires authentication)
   async createTodo(todo: {
     title: string
-    description?: string
-    is_public?: boolean
-    tags?: string[]
+    description?: string | null
+    is_public?: boolean | null
+    tags?: string[] | null
   }): Promise<Todo> {
     const {
       data: { user },
@@ -237,7 +226,7 @@ export const todoOperations = {
       }
     }
 
-    const todoData: any = {
+    const todoData: TodoInsert = {
       title: todo.title,
       description: todo.description,
       user_id: user.id,
@@ -249,7 +238,7 @@ export const todoOperations = {
       todoData.is_public = todo.is_public !== undefined ? todo.is_public : true
     }
     if (hasTagsColumn) {
-      todoData.tags = todo.tags || []
+      todoData.tags = todo.tags || null
     }
 
     const { data, error } = await supabase.from("todos").insert([todoData]).select().single()
@@ -268,7 +257,7 @@ export const todoOperations = {
   },
 
   // Update a todo (requires authentication and ownership)
-  async updateTodo(id: string, updates: Partial<Todo>): Promise<Todo> {
+  async updateTodo(id: string, updates: TodoUpdate): Promise<Todo> {
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -363,7 +352,7 @@ export const todoOperations = {
   },
 
   // Create a new tag (requires authentication)
-  async createTag(tag: Omit<TodoTag, "id" | "created_at">): Promise<TodoTag> {
+  async createTag(tag: TodoTagInsert): Promise<TodoTag> {
     const { data, error } = await supabase.from("todo_tags").insert([tag]).select().single()
 
     if (error) {
@@ -388,7 +377,9 @@ export const todoOperations = {
     // Check if is_public column exists
     const hasPublicColumn = await this.checkPublicColumnExists()
 
-    let query = supabase.from("todos").select("completed, user_id" + (hasPublicColumn ? ", is_public" : ""))
+    let query = hasPublicColumn 
+      ? supabase.from("todos").select("completed, user_id, is_public")
+      : supabase.from("todos").select("completed, user_id")
 
     if (hasPublicColumn) {
       if (user) {

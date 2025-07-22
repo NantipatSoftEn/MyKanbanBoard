@@ -436,7 +436,7 @@ function TodoList() {
           <div className="flex justify-between items-center mb-4">
             <div></div>
             <h1 className="text-4xl font-bold text-gray-900" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
-              {hasPublicColumn ? "Community Todo List" : "Todo List"}
+              {hasPublicColumn ? "จำไม่หมดจดกันเถอะ" : "จำไม่หมดจดกันเถอะ"}
             </h1>
             <div className="flex items-center gap-2">
               {user ? (
@@ -460,8 +460,8 @@ function TodoList() {
           <p className="text-gray-600">
             {hasPublicColumn
               ? user
-                ? "View and manage todos from the community!"
-                : "View todos from the community. Sign in to add your own!"
+                ? ""
+                : ""
               : user
                 ? "Manage your personal todos!"
                 : "View todos. Sign in to add your own!"}
@@ -545,7 +545,7 @@ function TodoList() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
               <Plus className="w-5 h-5" />
-              Add New Todo
+              Add New Notes
               {!user && (
                 <Badge variant="secondary" className="ml-2">
                   Sign in required

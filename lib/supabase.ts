@@ -1,26 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database, Tables } from './database.types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-export interface Task {
-  id: string;
-  user_id?: string;
-  title: string;
-  description?: string | null;
-  status: "todo" | "inprogress" | "done";
-  priority: "low" | "medium" | "high";
-  created_at: string;
-  updated_at: string;
-  due_date?: string | null;
-  assignee?: string | null;
-  position: number;
-  is_public?: boolean;
-  deleted_at?: string | null;
-  is_deleted?: boolean;
-}
+// Use the database types for consistency
+export type Task = Tables<'tasks'>
+export type TaskInsert = Database['public']['Tables']['tasks']['Insert']
+export type TaskUpdate = Database['public']['Tables']['tasks']['Update']
 
 export interface Column {
   id: string;
@@ -32,6 +21,7 @@ export interface Column {
 export const mockTasks: Task[] = [
   {
     id: "mock-1",
+    user_id: null,
     title: "Design new landing page",
     description:
       "Create a modern, responsive landing page with hero section, call-to-action buttons, and mobile optimization",
@@ -44,10 +34,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "John Doe",
     position: 1,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-2",
+    user_id: null,
     title: "Fix login authentication bug",
     description:
       "Users are unable to login with Google OAuth. Debug the authentication flow and fix redirect issues in production",
@@ -60,10 +53,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "Jane Smith",
     position: 2,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-3",
+    user_id: null,
     title: "Update API documentation",
     description:
       "Update the REST API documentation with new endpoints, request/response examples, and authentication details",
@@ -76,10 +72,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "Alex Johnson",
     position: 3,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-4",
+    user_id: null,
     title: "Implement search functionality",
     description:
       "Add global search feature with filters, sorting, and real-time results across all content types",
@@ -92,10 +91,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "Sarah Wilson",
     position: 4,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-5",
+    user_id: null,
     title: "Setup monitoring alerts",
     description:
       "Configure application monitoring with alerts for errors, performance issues, and downtime notifications",
@@ -108,10 +110,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: null,
     position: 5,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-6",
+    user_id: null,
     title: "Implement user dashboard",
     description:
       "Create a comprehensive user dashboard showing analytics, recent activity, user preferences, and personalized content",
@@ -124,10 +129,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "Mike Johnson",
     position: 1,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-7",
+    user_id: null,
     title: "Setup CI/CD pipeline",
     description:
       "Configure GitHub Actions for automated testing, building, and deployment to staging and production environments",
@@ -140,10 +148,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "Sarah Wilson",
     position: 2,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-8",
+    user_id: null,
     title: "Database optimization",
     description:
       "Optimize database queries, add proper indexing, and implement caching strategies for better performance",
@@ -156,10 +167,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "David Chen",
     position: 3,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-9",
+    user_id: null,
     title: "Mobile app development",
     description:
       "Develop React Native mobile application with core features and offline synchronization capabilities",
@@ -172,10 +186,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "Emily Rodriguez",
     position: 4,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-10",
+    user_id: null,
     title: "Setup project structure",
     description:
       "Initialize the project with proper folder structure, dependencies, linting rules, and development environment",
@@ -188,10 +205,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "John Doe",
     position: 1,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-11",
+    user_id: null,
     title: "Create initial UI components",
     description:
       "Build the basic UI components using shadcn/ui library with proper styling, accessibility, and documentation",
@@ -204,10 +224,13 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "Jane Smith",
     position: 2,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
   {
     id: "mock-12",
+    user_id: null,
     title: "Setup authentication system",
     description:
       "Implement user authentication with email/password, social login, and secure session management",
@@ -220,6 +243,8 @@ export const mockTasks: Task[] = [
       .split("T")[0],
     assignee: "Mike Johnson",
     position: 3,
+    is_public: true,
+    deleted_at: null,
     is_deleted: false,
   },
 ];
@@ -277,7 +302,7 @@ export const taskOperations = {
   // Create a new task (requires authentication)
   async createTask(
     task: Omit<
-      Task,
+      TaskInsert,
       | "id"
       | "created_at"
       | "updated_at"
@@ -318,7 +343,7 @@ export const taskOperations = {
   },
 
   // Update a task (requires authentication and ownership)
-  async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
+  async updateTask(id: string, updates: TaskUpdate): Promise<Task> {
     const {
       data: { user },
     } = await supabase.auth.getUser();
