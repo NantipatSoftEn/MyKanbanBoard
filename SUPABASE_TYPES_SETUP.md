@@ -5,37 +5,37 @@ This guide shows how to set up proper TypeScript types for your Supabase project
 ## 1. Install Supabase CLI (Recommended)
 
 ### Install globally:
-```bash
+\`\`\`bash
 npm install -g supabase
-```
+\`\`\`
 
 ### Or install as dev dependency:
-```bash
+\`\`\`bash
 npm install --save-dev supabase
-```
+\`\`\`
 
 ## 2. Generate Types from Your Database
 
 ### Option A: Using Supabase CLI (Automatic - Recommended)
-```bash
+\`\`\`bash
 # Login to Supabase
 supabase login
 
 # Generate types from your project
 npx supabase gen types typescript --project-id YOUR_PROJECT_ID > lib/database.types.ts
-```
+\`\`\`
 
 ### Option B: Using Environment Variables
-```bash
+\`\`\`bash
 # Set your project reference (found in your Supabase dashboard URL)
 npx supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > lib/database.types.ts
-```
+\`\`\`
 
 ### Option C: Using Direct Database Connection
-```bash
+\`\`\`bash
 # If you have direct database access
 npx supabase gen types typescript --db-url "postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres" > lib/database.types.ts
-```
+\`\`\`
 
 ## 3. Manual Type Generation (Current Setup)
 
@@ -48,7 +48,7 @@ We've created a manual `database.types.ts` file based on your current schema. Th
 ## 4. Usage Examples
 
 ### Basic Query with Types
-```typescript
+\`\`\`typescript
 import { supabase } from './lib/supabase'
 import type { Tables } from './lib/database.types'
 
@@ -58,10 +58,10 @@ const { data: todos, error } = await supabase
   .select('*')
   
 // todos is now typed as Tables<'todos'>[]
-```
+\`\`\`
 
 ### Insert with Types
-```typescript
+\`\`\`typescript
 import type { TablesInsert } from './lib/database.types'
 
 const newTodo: TablesInsert<'todos'> = {
@@ -77,10 +77,10 @@ const { data, error } = await supabase
   .insert(newTodo)
   .select()
   .single()
-```
+\`\`\`
 
 ### Update with Types
-```typescript
+\`\`\`typescript
 import type { TablesUpdate } from './lib/database.types'
 
 const updates: TablesUpdate<'todos'> = {
@@ -94,17 +94,17 @@ const { data, error } = await supabase
   .eq('id', todoId)
   .select()
   .single()
-```
+\`\`\`
 
 ### Specific Column Selection with Types
-```typescript
+\`\`\`typescript
 // Only select specific columns - TypeScript will infer the correct type
 const { data: todoStats, error } = await supabase
   .from('todos')
   .select('id, title, completed, user_id')
 
 // todoStats is typed as Pick<Tables<'todos'>, 'id' | 'title' | 'completed' | 'user_id'>[]
-```
+\`\`\`
 
 ## 5. Benefits of Proper Typing
 
@@ -118,13 +118,13 @@ const { data: todoStats, error } = await supabase
 
 ### Automatic (Recommended)
 Add to your `package.json` scripts:
-```json
+\`\`\`json
 {
   "scripts": {
     "types:generate": "supabase gen types typescript --project-id YOUR_PROJECT_ID > lib/database.types.ts"
   }
 }
-```
+\`\`\`
 
 Then run: `npm run types:generate` whenever your database schema changes.
 
@@ -134,7 +134,7 @@ When you add/modify database tables or columns, update the `database.types.ts` f
 ## 7. Common Patterns
 
 ### Conditional Column Selection
-```typescript
+\`\`\`typescript
 // Instead of dynamic string building (causes type issues):
 // const cols = "id, title" + (includeDesc ? ", description" : "")
 
@@ -142,10 +142,10 @@ When you add/modify database tables or columns, update the `database.types.ts` f
 const query = includeDescription 
   ? supabase.from('todos').select('id, title, description')
   : supabase.from('todos').select('id, title')
-```
+\`\`\`
 
 ### Complex Queries with Joins
-```typescript
+\`\`\`typescript
 // For complex queries with joins, you might need custom types
 type TodoWithTags = Tables<'todos'> & {
   todo_tags: Tables<'todo_tags'>[]
@@ -157,7 +157,7 @@ const { data, error } = await supabase
     *,
     todo_tags (*)
   `)
-```
+\`\`\`
 
 ## Your Current Setup
 
