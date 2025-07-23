@@ -9,9 +9,8 @@ import { SupabaseAuthProvider } from "@/contexts/supabase-auth-context"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Simple Kanban Board",
-  description: "A simple kanban board built with Next.js and Supabase",
-    generator: 'v0.dev'
+  title: "ArmyKanbanBoard",
+  description: "A Kanban board for managing Army tasks",
 }
 
 export default function RootLayout({

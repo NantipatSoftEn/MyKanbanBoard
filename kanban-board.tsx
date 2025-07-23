@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import {
   Plus,
   X,
@@ -236,6 +237,7 @@ export default function KanbanBoard() {
 
     const taskData: Task = {
       id: `temp-${Date.now()}`, // Temporary ID for mock data
+      user_id: user?.id || null,
       title: newTask.title,
       description: newTask.description || null,
       status: columnId as Task["status"],
@@ -245,6 +247,9 @@ export default function KanbanBoard() {
       position: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      is_public: false,
+      deleted_at: null,
+      is_deleted: null
     }
 
     // Try to create in database if connected
@@ -426,8 +431,14 @@ export default function KanbanBoard() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">My Kanban Board</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Army Kanban Board</h1>
           <div className="flex items-center gap-3">
+            <Link href="/notes">
+              <Button variant="outline" size="sm">
+                Notes
+              </Button>
+            </Link>
+            
             <Badge
               variant={isConnected ? "default" : usingMockData ? "secondary" : "destructive"}
               className="flex items-center gap-1"
@@ -435,7 +446,7 @@ export default function KanbanBoard() {
               {isConnected ? (
                 <>
                   <Wifi className="h-3 w-3" />
-                  Connected to Supabase
+                  Connected 
                 </>
               ) : usingMockData ? (
                 <>
