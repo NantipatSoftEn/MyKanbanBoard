@@ -439,7 +439,7 @@ function TodoList() {
               {hasPublicColumn ? "จำไม่หมดจดกันเถอะ" : "จำไม่หมดจดกันเถอะ"}
             </h1>
             <div className="flex items-center gap-2">
-              {user ? (
+              {/* {user ? (
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="flex items-center gap-1">
                     <User className="w-3 h-3" />
@@ -454,7 +454,7 @@ function TodoList() {
                   <LogIn className="w-4 h-4 mr-2" />
                   Sign In
                 </Button>
-              )}
+              )} */}
             </div>
           </div>
           <p className="text-gray-600">
@@ -715,9 +715,13 @@ function TodoList() {
                           )}
                           {hasPublicColumn &&
                             (todo.is_public ? (
-                              <Globe className="w-4 h-4 text-green-600" title="Public todo" />
+                              <span title="Public todo">
+                                <Globe className="w-4 h-4 text-green-600" />
+                              </span>
                             ) : (
-                              <Lock className="w-4 h-4 text-gray-500" title="Private todo" />
+                              <span title="Private todo">
+                                <Lock className="w-4 h-4 text-gray-500" />
+                              </span>
                             ))}
                         </div>
                       </div>
@@ -799,29 +803,6 @@ function TodoList() {
               </div>
             </CardContent>
           </Card>
-        )}
-
-        {/* Auth Modal */}
-        {showAuthModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-md">
-              <CardHeader className="text-center">
-                <CardTitle
-                  className="text-2xl font-bold text-gray-900"
-                  style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
-                >
-                  Sign In Required
-                </CardTitle>
-                <p className="text-gray-600 mt-2">Please sign in to add and manage your todos</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <AuthModal />
-                <Button variant="outline" onClick={() => setShowAuthModal(false)} className="w-full">
-                  Cancel
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
         )}
       </div>
     </div>

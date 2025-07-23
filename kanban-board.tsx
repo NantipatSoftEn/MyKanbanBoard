@@ -2,21 +2,14 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import {
   Plus,
   X,
   GripVertical,
   Eye,
   Database,
-  Wifi,
-  WifiOff,
   AlertTriangle,
-  RefreshCw,
   Lock,
-  LogIn,
-  LogOut,
-  User,
   Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -31,11 +24,13 @@ import { toast } from "@/hooks/use-toast"
 import { taskOperations, mockTasks, type Task, type Column } from "./lib/supabase"
 import { TaskDetailModal } from "./components/task-detail-modal"
 import { AuthModal } from "./components/auth-modal"
+import { KanbanStatusBar } from "./components/kanban-status-bar"
 import { useAuth } from "./contexts/supabase-auth-context"
 
 export default function KanbanBoard() {
   const { user, signOut } = useAuth()
   const isAuthenticated = !!user
+  const [mounted, setMounted] = useState(false)
 
   const [columns, setColumns] = useState<Column[]>([
     { id: "todo", title: "To Do", tasks: [] },
@@ -66,15 +61,21 @@ export default function KanbanBoard() {
 
   // Load tasks on component mount and when user changes
   useEffect(() => {
-    loadTasks()
-  }, []) // Remove user dependency for initial load
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      loadTasks()
+    }
+  }, [mounted]) // Remove user dependency for initial load
 
   // Reload when user logs in/out to show their personal tasks vs all tasks
   useEffect(() => {
-    if (user !== null) {
+    if (user !== null && mounted) {
       loadTasks()
     }
-  }, [user])
+  }, [user, mounted])
 
   const loadTasks = async () => {
     try {
@@ -416,7 +417,7 @@ export default function KanbanBoard() {
     }
   }
 
-  if (loading) {
+  if (loading || !mounted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
         <div className="flex items-center gap-3">
@@ -430,68 +431,6 @@ export default function KanbanBoard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Army Kanban Board</h1>
-          <div className="flex items-center gap-3">
-            <Link href="/notes">
-              <Button variant="outline" size="sm">
-                Notes
-              </Button>
-            </Link>
-            
-            <Badge
-              variant={isConnected ? "default" : usingMockData ? "secondary" : "destructive"}
-              className="flex items-center gap-1"
-            >
-              {isConnected ? (
-                <>
-                  <Wifi className="h-3 w-3" />
-                  Connected 
-                </>
-              ) : usingMockData ? (
-                <>
-                  <Database className="h-3 w-3" />
-                  Using Demo Data
-                </>
-              ) : (
-                <>
-                  <WifiOff className="h-3 w-3" />
-                  Database Disconnected
-                </>
-              )}
-            </Badge>
-
-            {isAuthenticated ? (
-              <Badge variant="default" className="flex items-center gap-1">
-                <User className="h-3 w-3" />
-                {user?.email}
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Lock className="h-3 w-3" />
-                View Only
-              </Badge>
-            )}
-
-            <Button variant="outline" size="sm" onClick={loadTasks} disabled={loading}>
-              <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-
-            {isAuthenticated ? (
-              <Button variant="outline" size="sm" onClick={signOut}>
-                <LogOut className="h-3 w-3 mr-1" />
-                Logout
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" onClick={() => setIsAuthModalOpen(true)}>
-                <LogIn className="h-3 w-3 mr-1" />
-                Login
-              </Button>
-            )}
-          </div>
-        </div>
-
         {!isAuthenticated && (
           <Alert className="mb-6 border-blue-200 bg-blue-50">
             <Lock className="h-4 w-4" />
@@ -518,6 +457,13 @@ export default function KanbanBoard() {
             </AlertDescription>
           </Alert>
         )}
+
+        <KanbanStatusBar
+          isConnected={isConnected}
+          usingMockData={usingMockData}
+          loading={loading}
+          onRefresh={loadTasks}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {columns.map((column) => (
