@@ -407,15 +407,30 @@ function TodoList() {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4"
+      className="min-h-screen p-4 relative overflow-hidden"
       style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
     >
-      <div className="max-w-6xl mx-auto">
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed top-0 left-0 w-full h-full object-cover -z-10 "
+      >
+        <source src="/loop.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      
+      {/* Background overlay for better readability */}
+      <div className="fixed top-0 left-0 w-full h-full bg-black/20 -z-5"></div>
+      
+      <div className="max-w-6xl mx-auto relative z-10">
         {/* Database Migration Warning */}
         {(!hasPublicColumn || !hasTagsColumn) && (
-          <Card className="mb-6 border-orange-200 bg-orange-50">
+          <Card className="mb-6 bg-orange-500/10 backdrop-blur-lg rounded-xl border border-orange-300/30 shadow-xl">
             <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-orange-800">
+              <div className="flex items-center gap-2 text-orange-200">
                 <AlertCircle className="w-5 h-5" />
                 <div>
                   <p className="font-semibold">Database Migration Required</p>
@@ -432,10 +447,10 @@ function TodoList() {
         )}
 
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <div></div>
-            <h1 className="text-4xl font-bold text-gray-900" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
+            <h1 className="text-4xl font-bold text-white drop-shadow-lg" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
               {hasPublicColumn ? "จำไม่หมดจดกันเถอะ" : "จำไม่หมดจดกันเถอะ"}
             </h1>
             <div className="flex items-center gap-2">
@@ -457,7 +472,7 @@ function TodoList() {
               )} */}
             </div>
           </div>
-          <p className="text-gray-600">
+          <p className="text-white/90 drop-shadow-sm">
             {hasPublicColumn
               ? user
                 ? ""
@@ -469,15 +484,15 @@ function TodoList() {
 
           {total > 0 && (
             <div className="flex justify-center gap-4 mt-4">
-              <Badge variant="outline" className="text-sm">
+              <Badge variant="outline" className="text-sm bg-white/15 backdrop-blur-sm border-white/30 text-white">
                 <CheckCircle2 className="w-4 h-4 mr-1" />
                 {completedCount} completed
               </Badge>
-              <Badge variant="outline" className="text-sm">
+              <Badge variant="outline" className="text-sm bg-white/15 backdrop-blur-sm border-white/30 text-white">
                 <Circle className="w-4 h-4 mr-1" />
                 {todos.length - completedCount} on this page
               </Badge>
-              <Badge variant="secondary" className="text-sm">
+              <Badge variant="secondary" className="text-sm bg-white/20 backdrop-blur-sm border-white/30 text-white">
                 Total: {total} todos
               </Badge>
             </div>
@@ -485,9 +500,9 @@ function TodoList() {
         </div>
 
         {/* Search and Filter Section */}
-        <Card className="mb-6 shadow-lg">
+        <Card className="mb-6 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-sm" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
               <Search className="w-5 h-5" />
               Search & Filter
             </CardTitle>
@@ -541,13 +556,13 @@ function TodoList() {
         </Card>
 
         {/* Create Todo Form */}
-        <Card className="mb-8 shadow-lg">
+        <Card className="mb-8 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-sm" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
               <Plus className="w-5 h-5" />
               Add New Notes
               {!user && (
-                <Badge variant="secondary" className="ml-2">
+                <Badge variant="secondary" className="ml-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
                   Sign in required
                 </Badge>
               )}
@@ -577,8 +592,8 @@ function TodoList() {
               {/* Tag Selector */}
               {user && hasTagsColumn && (
                 <div>
-                  <Label className="text-sm font-medium">Tags</Label>
-                  <div className="text-xs text-gray-500 mb-2">
+                  <Label className="text-sm font-medium text-white drop-shadow-sm">Tags</Label>
+                  <div className="text-xs text-white/70 mb-2">
                     Select existing tags or type new ones to create them automatically
                   </div>
                   <TagSelector
@@ -594,7 +609,7 @@ function TodoList() {
               {user && hasPublicColumn && (
                 <div className="flex items-center space-x-2">
                   <Switch id="is-public" checked={isPublic} onCheckedChange={setIsPublic} />
-                  <Label htmlFor="is-public" className="text-sm flex items-center gap-1">
+                  <Label htmlFor="is-public" className="text-sm flex items-center gap-1 text-white drop-shadow-sm">
                     {isPublic ? (
                       <>
                         <Globe className="w-4 h-4" />
@@ -618,11 +633,11 @@ function TodoList() {
 
         {/* Pagination Controls - Top */}
         {totalPages > 1 && (
-          <Card className="mb-6">
+          <Card className="mb-6 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Items per page:</span>
+                  <span className="text-sm text-white/80">Items per page:</span>
                   <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
                     <SelectTrigger className="w-20">
                       <SelectValue />
@@ -637,7 +652,7 @@ function TodoList() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-white/80">
                     Showing {(page - 1) * itemsPerPage + 1} to {Math.min(page * itemsPerPage, total)} of {total} todos
                   </span>
                 </div>
@@ -650,21 +665,21 @@ function TodoList() {
 
         {/* Todo List */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 mt-4">Loading todos...</p>
+          <div className="text-center py-12 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white/50 mx-auto"></div>
+            <p className="text-white/90 mt-4 drop-shadow-sm">Loading todos...</p>
           </div>
         ) : todos.length === 0 ? (
-          <Card className="text-center py-12">
+          <Card className="text-center py-12 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
             <CardContent>
-              <Circle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <Circle className="w-16 h-16 text-white/50 mx-auto mb-4" />
               <h3
-                className="text-xl font-semibold text-gray-700 mb-2"
+                className="text-xl font-semibold text-white drop-shadow-sm mb-2"
                 style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
               >
                 {searchTerm || filterCompleted !== "all" || filterTags.length > 0 ? "No todos found" : "No todos yet"}
               </h3>
-              <p className="text-gray-500">
+              <p className="text-white/80">
                 {searchTerm || filterCompleted !== "all" || filterTags.length > 0
                   ? "Try adjusting your search or filter criteria"
                   : user
@@ -678,9 +693,9 @@ function TodoList() {
             {todos.map((todo) => (
               <Card
                 key={todo.id}
-                className={`shadow-md transition-all duration-200 hover:shadow-lg ${
-                  todo.completed ? "bg-green-50 border-green-200" : "bg-white"
-                } ${isOwner(todo) ? "border-l-4 border-l-blue-500" : ""}`}
+                className={`transition-all duration-300 hover:shadow-xl bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-lg ${
+                  todo.completed ? "bg-green-500/10 border-green-300/30" : ""
+                } ${isOwner(todo) ? "border-l-4 border-l-blue-400/80" : ""}`}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
@@ -695,7 +710,7 @@ function TodoList() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3
                           className={`text-lg font-semibold ${
-                            todo.completed ? "text-green-700 line-through" : "text-gray-900"
+                            todo.completed ? "text-green-200 line-through drop-shadow-sm" : "text-white drop-shadow-sm"
                           }`}
                           style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
                         >
@@ -703,12 +718,12 @@ function TodoList() {
                         </h3>
                         <div className="flex items-center gap-1">
                           {isOwner(todo) ? (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-200 border-blue-300/50">
                               <User className="w-3 h-3 mr-1" />
                               Mine
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs bg-white/10 text-white/80 border-white/30">
                               <Globe className="w-3 h-3 mr-1" />
                               {hasPublicColumn ? "Public" : "Shared"}
                             </Badge>
@@ -716,18 +731,18 @@ function TodoList() {
                           {hasPublicColumn &&
                             (todo.is_public ? (
                               <span title="Public todo">
-                                <Globe className="w-4 h-4 text-green-600" />
+                                <Globe className="w-4 h-4 text-green-300" />
                               </span>
                             ) : (
                               <span title="Private todo">
-                                <Lock className="w-4 h-4 text-gray-500" />
+                                <Lock className="w-4 h-4 text-white/60" />
                               </span>
                             ))}
                         </div>
                       </div>
 
                       {todo.description && (
-                        <p className={`mt-2 ${todo.completed ? "text-green-600 line-through" : "text-gray-600"}`}>
+                        <p className={`mt-2 ${todo.completed ? "text-green-200 line-through" : "text-white/90"} drop-shadow-sm`}>
                           {todo.description}
                         </p>
                       )}
@@ -760,7 +775,7 @@ function TodoList() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                      <div className="flex items-center gap-4 mt-3 text-sm text-white/70">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
                           Created: {formatDate(todo.created_at)}
@@ -776,7 +791,7 @@ function TodoList() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteTodo(todo.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-300 hover:text-red-200 hover:bg-red-500/20 backdrop-blur-sm"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -790,16 +805,16 @@ function TodoList() {
 
         {/* Pagination Controls - Bottom */}
         {totalPages > 1 && (
-          <Card className="mt-6">
+          <Card className="mt-6 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-white/80">
                   Page {page} of {totalPages}
                 </div>
 
                 <div className="flex items-center gap-1">{generatePaginationButtons()}</div>
 
-                <div className="text-sm text-gray-600">Total: {total} todos</div>
+                <div className="text-sm text-white/80">Total: {total} todos</div>
               </div>
             </CardContent>
           </Card>

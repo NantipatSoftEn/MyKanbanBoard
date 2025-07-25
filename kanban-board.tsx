@@ -401,13 +401,13 @@ export default function KanbanBoard() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-500/20 text-red-200 border-red-300/50"
       case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-500/20 text-yellow-200 border-yellow-300/50"
       case "low":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-500/20 text-green-200 border-green-300/50"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-500/20 text-gray-200 border-gray-300/50"
     }
   }
 
@@ -419,18 +419,47 @@ export default function KanbanBoard() {
 
   if (loading || !mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
-        <div className="flex items-center gap-3">
-          <Database className="h-6 w-6 animate-pulse" />
-          <div className="text-lg">Loading your tasks...</div>
+      <div className="min-h-screen p-6 flex items-center justify-center relative overflow-hidden">
+        {/* Background Video for loading state */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="fixed top-0 left-0 w-full h-full object-cover -z-10"
+        >
+          <source src="/loop.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        
+        <div className="fixed top-0 left-0 w-full h-full bg-black/20 -z-5"></div>
+        
+        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl">
+          <Database className="h-6 w-6 animate-pulse text-white" />
+          <div className="text-lg text-white drop-shadow-md">Loading your tasks...</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-6 relative overflow-hidden">
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed top-0 left-0 w-full h-full object-cover -z-10 "
+      >
+        <source src="/loop.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      
+      {/* Background overlay for better readability */}
+      <div className="fixed top-0 left-0 w-full h-full bg-black/20 -z-5"></div>
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         {!isAuthenticated && (
           <Alert className="mb-6 border-blue-200 bg-blue-50">
             <Lock className="h-4 w-4" />
@@ -469,13 +498,13 @@ export default function KanbanBoard() {
           {columns.map((column) => (
             <div
               key={column.id}
-              className="bg-gray-100 rounded-lg p-4 min-h-[600px]"
+              className="bg-white/10 backdrop-blur-md rounded-xl p-6 min-h-[600px] border border-white/20 shadow-2xl shadow-black/10"
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, column.id)}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-700 text-lg">{column.title}</h2>
-                <Badge variant="secondary" className="text-xs">
+                <h2 className="font-semibold text-white text-lg drop-shadow-md">{column.title}</h2>
+                <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm">
                   {column.tasks.length}
                 </Badge>
               </div>
@@ -485,8 +514,8 @@ export default function KanbanBoard() {
                   <Card
                     key={task.id}
                     className={`task-card ${
-                      isAuthenticated ? "cursor-move hover:shadow-md" : "cursor-default hover:shadow-sm"
-                    } transition-shadow bg-white ${!isAuthenticated ? "opacity-95" : ""}`}
+                      isAuthenticated ? "cursor-move hover:shadow-xl hover:bg-white/25" : "cursor-default hover:shadow-lg hover:bg-white/20"
+                    } transition-all duration-300 bg-white/15 backdrop-blur-lg rounded-xl border border-white/25 shadow-lg shadow-black/5 ${!isAuthenticated ? "opacity-90" : ""}`}
                     draggable={isAuthenticated}
                     onDragStart={() => handleDragStart(task, column.id)}
                     onClick={() => !isAuthenticated && handleTaskClick(task)}
@@ -494,8 +523,8 @@ export default function KanbanBoard() {
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2 flex-1">
-                          <GripVertical className={`h-4 w-4 ${isAuthenticated ? "text-gray-400" : "text-gray-300"}`} />
-                          <h3 className="task-card font-medium leading-tight">{task.title}</h3>
+                          <GripVertical className={`h-4 w-4 ${isAuthenticated ? "text-white/70" : "text-white/50"}`} />
+                          <h3 className="task-card font-medium leading-tight text-white drop-shadow-sm">{task.title}</h3>
                         </div>
                         <div className="flex gap-1">
                           <Button
@@ -530,28 +559,28 @@ export default function KanbanBoard() {
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="flex items-center justify-between mb-3">
-                        <Badge variant="outline" className={`task-priority ${getPriorityColor(task.priority)}`}>
+                        <Badge variant="outline" className={`task-priority backdrop-blur-sm border-white/30 ${getPriorityColor(task.priority)}`}>
                           {task.priority}
                         </Badge>
                         {task.due_date && (
-                          <span className="task-date text-gray-500">
+                          <span className="task-date text-white/80 text-sm drop-shadow-sm">
                             {new Date(task.due_date).toLocaleDateString()}
                           </span>
                         )}
                       </div>
                       {task.description && (
-                        <p className="task-card text-gray-600 mt-2 line-clamp-3">{task.description}</p>
+                        <p className="task-card text-white/90 mt-2 line-clamp-3 text-sm drop-shadow-sm">{task.description}</p>
                       )}
-                      {task.assignee && <p className="task-assignee text-blue-600 mt-2">@{task.assignee}</p>}
+                      {task.assignee && <p className="task-assignee text-blue-300 mt-2 drop-shadow-sm">@{task.assignee}</p>}
                     </CardContent>
                   </Card>
                 ))}
               </div>
 
               {showAddTask === column.id && isAuthenticated ? (
-                <div className="mt-3 space-y-3 p-3 bg-white rounded-lg border">
+                <div className="mt-3 space-y-3 p-4 bg-white/10 backdrop-blur-lg rounded-xl border border-white/25 shadow-xl shadow-black/10">
                   <div>
-                    <Label htmlFor="title" className="text-sm font-medium">
+                    <Label htmlFor="title" className="text-sm font-medium text-white drop-shadow-sm">
                       Title *
                     </Label>
                     <Input
@@ -564,7 +593,7 @@ export default function KanbanBoard() {
                   </div>
 
                   <div>
-                    <Label htmlFor="description" className="text-sm font-medium">
+                    <Label htmlFor="description" className="text-sm font-medium text-white drop-shadow-sm">
                       Description
                     </Label>
                     <Textarea
@@ -578,7 +607,7 @@ export default function KanbanBoard() {
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label htmlFor="priority" className="text-sm font-medium">
+                      <Label htmlFor="priority" className="text-sm font-medium text-white drop-shadow-sm">
                         Priority
                       </Label>
                       <Select
@@ -599,7 +628,7 @@ export default function KanbanBoard() {
                     </div>
 
                     <div>
-                      <Label htmlFor="due_date" className="text-sm font-medium">
+                      <Label htmlFor="due_date" className="text-sm font-medium text-white drop-shadow-sm">
                         Due Date
                       </Label>
                       <Input
@@ -612,7 +641,7 @@ export default function KanbanBoard() {
                   </div>
 
                   <div>
-                    <Label htmlFor="assignee" className="text-sm font-medium">
+                    <Label htmlFor="assignee" className="text-sm font-medium text-white drop-shadow-sm">
                       Assignee
                     </Label>
                     <Input
@@ -653,7 +682,7 @@ export default function KanbanBoard() {
               ) : isAuthenticated ? (
                 <Button
                   variant="ghost"
-                  className="w-full mt-3 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                  className="w-full mt-3 border-2 border-dashed border-white/30 hover:border-white/50 hover:bg-white/10 text-white backdrop-blur-sm rounded-xl"
                   onClick={() => setShowAddTask(column.id)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -662,7 +691,7 @@ export default function KanbanBoard() {
               ) : (
                 <Button
                   variant="ghost"
-                  className="w-full mt-3 border-2 border-dashed border-gray-200 opacity-60 cursor-not-allowed"
+                  className="w-full mt-3 border-2 border-dashed border-white/20 opacity-60 cursor-not-allowed text-white/60 backdrop-blur-sm rounded-xl"
                   onClick={() => setIsAuthModalOpen(true)}
                 >
                   <Lock className="h-4 w-4 mr-2" />
