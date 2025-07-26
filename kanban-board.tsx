@@ -2,16 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import {
-  Plus,
-  X,
-  GripVertical,
-  Eye,
-  Database,
-  AlertTriangle,
-  Lock,
-  Trash2,
-} from "lucide-react"
+import { Plus, X, GripVertical, Eye, Database, AlertTriangle, Lock, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -250,7 +241,7 @@ export default function KanbanBoard() {
       updated_at: new Date().toISOString(),
       is_public: false,
       deleted_at: null,
-      is_deleted: null
+      is_deleted: null,
     }
 
     // Try to create in database if connected
@@ -401,13 +392,13 @@ export default function KanbanBoard() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-500/20 text-red-200 border-red-300/50"
+        return "bg-red-500/25 text-red-200 border-red-300/60 backdrop-blur-sm"
       case "medium":
-        return "bg-yellow-500/20 text-yellow-200 border-yellow-300/50"
+        return "bg-yellow-500/25 text-yellow-200 border-yellow-300/60 backdrop-blur-sm"
       case "low":
-        return "bg-green-500/20 text-green-200 border-green-300/50"
+        return "bg-green-500/25 text-green-200 border-green-300/60 backdrop-blur-sm"
       default:
-        return "bg-gray-500/20 text-gray-200 border-gray-300/50"
+        return "bg-gray-500/25 text-gray-200 border-gray-300/60 backdrop-blur-sm"
     }
   }
 
@@ -421,20 +412,14 @@ export default function KanbanBoard() {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center relative overflow-hidden">
         {/* Background Video for loading state */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="fixed top-0 left-0 w-full h-full object-cover -z-10"
-        >
-          <source src="/loop.mp4" type="video/mp4" />
+        <video autoPlay loop muted playsInline className="fixed top-0 left-0 w-full h-full object-cover -z-10">
+          <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_i7dyLy8i8ztystF0OGq5i7lxX8Fb/rnhgi9A9DQBkzXjdzvAXdU/public/loop.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        
-        <div className="fixed top-0 left-0 w-full h-full bg-black/20 -z-5"></div>
-        
-        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl">
+
+        <div className="fixed top-0 left-0 w-full h-full bg-black/30 -z-5"></div>
+
+        <div className="flex items-center gap-3 bg-white/15 backdrop-blur-lg rounded-xl p-6 border border-white/30 shadow-xl">
           <Database className="h-6 w-6 animate-pulse text-white" />
           <div className="text-lg text-white drop-shadow-md">Loading your tasks...</div>
         </div>
@@ -445,27 +430,21 @@ export default function KanbanBoard() {
   return (
     <div className="min-h-screen p-6 relative overflow-hidden">
       {/* Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="fixed top-0 left-0 w-full h-full object-cover -z-10 "
-      >
-        <source src="/loop.mp4" type="video/mp4" />
+      <video autoPlay loop muted playsInline className="fixed top-0 left-0 w-full h-full object-cover -z-10 ">
+        <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_i7dyLy8i8ztystF0OGq5i7lxX8Fb/rnhgi9A9DQBkzXjdzvAXdU/public/loop.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      
+
       {/* Background overlay for better readability */}
-      <div className="fixed top-0 left-0 w-full h-full bg-black/20 -z-5"></div>
-      
+      <div className="fixed top-0 left-0 w-full h-full bg-black/30 -z-5"></div>
+
       <div className="max-w-7xl mx-auto relative z-10">
         {!isAuthenticated && (
-          <Alert className="mb-6 border-blue-200 bg-blue-50">
-            <Lock className="h-4 w-4" />
-            <AlertDescription className="text-blue-800">
-              <div className="font-medium">View-Only Mode</div>
-              <div className="text-sm mt-1">
+          <Alert className="mb-6 bg-blue-500/20 backdrop-blur-lg border-blue-300/40 rounded-xl">
+            <Lock className="h-4 w-4 text-blue-200" />
+            <AlertDescription className="text-blue-100">
+              <div className="font-medium text-white drop-shadow-sm">View-Only Mode</div>
+              <div className="text-sm mt-1 text-blue-100/90">
                 You're viewing the board in read-only mode. Login to create, edit, or move tasks.
               </div>
             </AlertDescription>
@@ -473,13 +452,13 @@ export default function KanbanBoard() {
         )}
 
         {error && (
-          <Alert className="mb-6 border-orange-200 bg-orange-50">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="text-orange-800">
-              <div className="font-medium">Database Connection Issue</div>
-              <div className="text-sm mt-1">{error}</div>
+          <Alert className="mb-6 bg-orange-500/20 backdrop-blur-lg border-orange-300/40 rounded-xl">
+            <AlertTriangle className="h-4 w-4 text-orange-200" />
+            <AlertDescription className="text-orange-100">
+              <div className="font-medium text-white drop-shadow-sm">Database Connection Issue</div>
+              <div className="text-sm mt-1 text-orange-100/90">{error}</div>
               {error.includes("table not found") || error.includes("does not exist") ? (
-                <div className="text-sm mt-2">
+                <div className="text-sm mt-2 text-orange-100/90">
                   <strong>Solution:</strong> Run the SQL script in your Supabase dashboard to create the tasks table.
                 </div>
               ) : null}
@@ -498,13 +477,13 @@ export default function KanbanBoard() {
           {columns.map((column) => (
             <div
               key={column.id}
-              className="bg-white/10 backdrop-blur-md rounded-xl p-6 min-h-[600px] border border-white/20 shadow-2xl shadow-black/10"
+              className="bg-white/15 backdrop-blur-md rounded-xl p-6 min-h-[600px] border border-white/30 shadow-2xl shadow-black/10"
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, column.id)}
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-white text-lg drop-shadow-md">{column.title}</h2>
-                <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                <Badge variant="secondary" className="text-xs bg-white/25 text-white border-white/40 backdrop-blur-sm">
                   {column.tasks.length}
                 </Badge>
               </div>
@@ -514,8 +493,10 @@ export default function KanbanBoard() {
                   <Card
                     key={task.id}
                     className={`task-card ${
-                      isAuthenticated ? "cursor-move hover:shadow-xl hover:bg-white/25" : "cursor-default hover:shadow-lg hover:bg-white/20"
-                    } transition-all duration-300 bg-white/15 backdrop-blur-lg rounded-xl border border-white/25 shadow-lg shadow-black/5 ${!isAuthenticated ? "opacity-90" : ""}`}
+                      isAuthenticated
+                        ? "cursor-move hover:shadow-xl hover:bg-white/25"
+                        : "cursor-default hover:shadow-lg hover:bg-white/20"
+                    } transition-all duration-300 bg-white/20 backdrop-blur-lg rounded-xl border border-white/30 shadow-lg shadow-black/5 ${!isAuthenticated ? "opacity-90" : ""}`}
                     draggable={isAuthenticated}
                     onDragStart={() => handleDragStart(task, column.id)}
                     onClick={() => !isAuthenticated && handleTaskClick(task)}
@@ -524,25 +505,27 @@ export default function KanbanBoard() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2 flex-1">
                           <GripVertical className={`h-4 w-4 ${isAuthenticated ? "text-white/70" : "text-white/50"}`} />
-                          <h3 className="task-card font-medium leading-tight text-white drop-shadow-sm">{task.title}</h3>
+                          <h3 className="task-card font-medium leading-tight text-white drop-shadow-sm">
+                            {task.title}
+                          </h3>
                         </div>
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0 hover:bg-blue-100"
+                            className="h-6 w-6 p-0 hover:bg-blue-500/30 backdrop-blur-sm"
                             onClick={() => openTaskDetail(task)}
                           >
-                            <Eye className="h-3 w-3 text-blue-500" />
+                            <Eye className="h-3 w-3 text-blue-300" />
                           </Button>
                           {isAuthenticated ? (
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 w-6 p-0 hover:bg-red-100"
+                              className="h-6 w-6 p-0 hover:bg-red-500/30 backdrop-blur-sm"
                               onClick={() => deleteTask(task)}
                             >
-                              <Trash2 className="h-3 w-3 text-red-500" />
+                              <Trash2 className="h-3 w-3 text-red-300" />
                             </Button>
                           ) : (
                             <Button
@@ -551,7 +534,7 @@ export default function KanbanBoard() {
                               className="h-6 w-6 p-0 opacity-50 cursor-not-allowed"
                               onClick={() => setIsAuthModalOpen(true)}
                             >
-                              <X className="h-3 w-3 text-gray-400" />
+                              <X className="h-3 w-3 text-white/50" />
                             </Button>
                           )}
                         </div>
@@ -559,26 +542,30 @@ export default function KanbanBoard() {
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="flex items-center justify-between mb-3">
-                        <Badge variant="outline" className={`task-priority backdrop-blur-sm border-white/30 ${getPriorityColor(task.priority)}`}>
+                        <Badge variant="outline" className={`task-priority ${getPriorityColor(task.priority)}`}>
                           {task.priority}
                         </Badge>
                         {task.due_date && (
-                          <span className="task-date text-white/80 text-sm drop-shadow-sm">
+                          <span className="task-date text-white/90 text-sm drop-shadow-sm">
                             {new Date(task.due_date).toLocaleDateString()}
                           </span>
                         )}
                       </div>
                       {task.description && (
-                        <p className="task-card text-white/90 mt-2 line-clamp-3 text-sm drop-shadow-sm">{task.description}</p>
+                        <p className="task-card text-white/90 mt-2 line-clamp-3 text-sm drop-shadow-sm">
+                          {task.description}
+                        </p>
                       )}
-                      {task.assignee && <p className="task-assignee text-blue-300 mt-2 drop-shadow-sm">@{task.assignee}</p>}
+                      {task.assignee && (
+                        <p className="task-assignee text-blue-300 mt-2 drop-shadow-sm">@{task.assignee}</p>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
               </div>
 
               {showAddTask === column.id && isAuthenticated ? (
-                <div className="mt-3 space-y-3 p-4 bg-white/10 backdrop-blur-lg rounded-xl border border-white/25 shadow-xl shadow-black/10">
+                <div className="mt-3 space-y-3 p-4 bg-white/15 backdrop-blur-lg rounded-xl border border-white/30 shadow-xl shadow-black/10">
                   <div>
                     <Label htmlFor="title" className="text-sm font-medium text-white drop-shadow-sm">
                       Title *
@@ -589,6 +576,7 @@ export default function KanbanBoard() {
                       value={newTask.title}
                       onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                       autoFocus
+                      className="bg-white/20 backdrop-blur-sm border-white/40 text-white placeholder:text-white/70"
                     />
                   </div>
 
@@ -602,6 +590,7 @@ export default function KanbanBoard() {
                       value={newTask.description}
                       onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                       rows={2}
+                      className="bg-white/20 backdrop-blur-sm border-white/40 text-white placeholder:text-white/70"
                     />
                   </div>
 
@@ -616,10 +605,10 @@ export default function KanbanBoard() {
                           setNewTask({ ...newTask, priority: value })
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-white/20 backdrop-blur-sm border-white/40 text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white/90 backdrop-blur-lg border-white/50">
                           <SelectItem value="low">Low</SelectItem>
                           <SelectItem value="medium">Medium</SelectItem>
                           <SelectItem value="high">High</SelectItem>
@@ -636,6 +625,7 @@ export default function KanbanBoard() {
                         type="date"
                         value={newTask.due_date}
                         onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
+                        className="bg-white/20 backdrop-blur-sm border-white/40 text-white"
                       />
                     </div>
                   </div>
@@ -649,6 +639,7 @@ export default function KanbanBoard() {
                       placeholder="Assign to..."
                       value={newTask.assignee}
                       onChange={(e) => setNewTask({ ...newTask, assignee: e.target.value })}
+                      className="bg-white/20 backdrop-blur-sm border-white/40 text-white placeholder:text-white/70"
                     />
                   </div>
 
@@ -656,7 +647,7 @@ export default function KanbanBoard() {
                     <Button
                       size="sm"
                       onClick={() => addTask(column.id)}
-                      className="flex-1"
+                      className="flex-1 bg-white/30 backdrop-blur-sm text-white hover:bg-white/40"
                       disabled={!newTask.title.trim()}
                     >
                       Add Task
@@ -674,6 +665,7 @@ export default function KanbanBoard() {
                           assignee: "",
                         })
                       }}
+                      className="bg-white/20 backdrop-blur-sm border-white/40 text-white hover:bg-white/30"
                     >
                       Cancel
                     </Button>
@@ -682,7 +674,7 @@ export default function KanbanBoard() {
               ) : isAuthenticated ? (
                 <Button
                   variant="ghost"
-                  className="w-full mt-3 border-2 border-dashed border-white/30 hover:border-white/50 hover:bg-white/10 text-white backdrop-blur-sm rounded-xl"
+                  className="w-full mt-3 border-2 border-dashed border-white/40 hover:border-white/60 hover:bg-white/15 text-white backdrop-blur-sm rounded-xl"
                   onClick={() => setShowAddTask(column.id)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -691,7 +683,7 @@ export default function KanbanBoard() {
               ) : (
                 <Button
                   variant="ghost"
-                  className="w-full mt-3 border-2 border-dashed border-white/20 opacity-60 cursor-not-allowed text-white/60 backdrop-blur-sm rounded-xl"
+                  className="w-full mt-3 border-2 border-dashed border-white/30 opacity-60 cursor-not-allowed text-white/70 backdrop-blur-sm rounded-xl"
                   onClick={() => setIsAuthModalOpen(true)}
                 >
                   <Lock className="h-4 w-4 mr-2" />

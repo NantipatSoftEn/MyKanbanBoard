@@ -26,13 +26,11 @@ import {
   User,
   Globe,
   Lock,
-  LogIn,
   AlertCircle,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { todoOperations, type TodoResponse, type TodoFilters, type TodoTag } from "@/lib/todo-supabase"
 import { useAuth } from "@/contexts/supabase-auth-context"
-import { AuthModal } from "@/components/auth-modal"
 import { TagSelector } from "@/components/tag-selector"
 import { TagFilter } from "@/components/tag-filter"
 import { SupabaseAuthProvider } from "@/contexts/supabase-auth-context"
@@ -349,14 +347,28 @@ function TodoList() {
 
     // First page
     buttons.push(
-      <Button key="first" variant="outline" size="sm" onClick={() => handlePageChange(1)} disabled={page === 1}>
+      <Button
+        key="first"
+        variant="outline"
+        size="sm"
+        onClick={() => handlePageChange(1)}
+        disabled={page === 1}
+        className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
+      >
         <ChevronsLeft className="w-4 h-4" />
       </Button>,
     )
 
     // Previous page
     buttons.push(
-      <Button key="prev" variant="outline" size="sm" onClick={() => handlePageChange(page - 1)} disabled={page === 1}>
+      <Button
+        key="prev"
+        variant="outline"
+        size="sm"
+        onClick={() => handlePageChange(page - 1)}
+        disabled={page === 1}
+        className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
+      >
         <ChevronLeft className="w-4 h-4" />
       </Button>,
     )
@@ -367,7 +379,17 @@ function TodoList() {
 
     for (let i = startPage; i <= endPage; i++) {
       buttons.push(
-        <Button key={i} variant={i === page ? "default" : "outline"} size="sm" onClick={() => handlePageChange(i)}>
+        <Button
+          key={i}
+          variant={i === page ? "default" : "outline"}
+          size="sm"
+          onClick={() => handlePageChange(i)}
+          className={
+            i === page
+              ? "bg-white/30 backdrop-blur-sm text-white"
+              : "bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
+          }
+        >
           {i}
         </Button>,
       )
@@ -381,6 +403,7 @@ function TodoList() {
         size="sm"
         onClick={() => handlePageChange(page + 1)}
         disabled={page === totalPages}
+        className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
       >
         <ChevronRight className="w-4 h-4" />
       </Button>,
@@ -394,6 +417,7 @@ function TodoList() {
         size="sm"
         onClick={() => handlePageChange(totalPages)}
         disabled={page === totalPages}
+        className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
       >
         <ChevronsRight className="w-4 h-4" />
       </Button>,
@@ -411,31 +435,26 @@ function TodoList() {
       style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
     >
       {/* Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="fixed top-0 left-0 w-full h-full object-cover -z-10 "
-      >
-        <source src="/loop.mp4" type="video/mp4" />
+      <video autoPlay loop muted playsInline className="fixed top-0 left-0 w-full h-full object-cover -z-10 ">
+        <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_i7dyLy8i8ztystF0OGq5i7lxX8Fb/rnhgi9A9DQBkzXjdzvAXdU/public/loop.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      
+
       {/* Background overlay for better readability */}
-      <div className="fixed top-0 left-0 w-full h-full bg-black/20 -z-5"></div>
-      
+      <div className="fixed top-0 left-0 w-full h-full bg-black/30 -z-5"></div>
+
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Database Migration Warning */}
         {(!hasPublicColumn || !hasTagsColumn) && (
-          <Card className="mb-6 bg-orange-500/10 backdrop-blur-lg rounded-xl border border-orange-300/30 shadow-xl">
+          <Card className="mb-6 bg-orange-500/20 backdrop-blur-lg rounded-xl border border-orange-300/40 shadow-xl">
             <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-orange-200">
+              <div className="flex items-center gap-2 text-orange-100">
                 <AlertCircle className="w-5 h-5" />
                 <div>
-                  <p className="font-semibold">Database Migration Required</p>
-                  <p className="text-sm">
-                    Please run the migration script <code>add-tags-to-todos.sql</code> to enable
+                  <p className="font-semibold text-white drop-shadow-sm">Database Migration Required</p>
+                  <p className="text-sm text-orange-100/90">
+                    Please run the migration script{" "}
+                    <code className="bg-white/20 px-1 rounded text-white">add-tags-to-todos.sql</code> to enable
                     {!hasPublicColumn && " public/private"}
                     {!hasPublicColumn && !hasTagsColumn && " and"}
                     {!hasTagsColumn && " tagging"} features.
@@ -447,30 +466,16 @@ function TodoList() {
         )}
 
         {/* Header */}
-        <div className="text-center mb-8 bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl">
+        <div className="text-center mb-8 bg-white/15 backdrop-blur-lg rounded-xl p-6 border border-white/30 shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <div></div>
-            <h1 className="text-4xl font-bold text-white drop-shadow-lg" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
+            <h1
+              className="text-4xl font-bold text-white drop-shadow-lg"
+              style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
+            >
               {hasPublicColumn ? "จำไม่หมดจดกันเถอะ" : "จำไม่หมดจดกันเถอะ"}
             </h1>
-            <div className="flex items-center gap-2">
-              {/* {user ? (
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    <User className="w-3 h-3" />
-                    {user.email}
-                  </Badge>
-                  <Button variant="outline" size="sm" onClick={signOut}>
-                    Sign Out
-                  </Button>
-                </div>
-              ) : (
-                <Button variant="outline" size="sm" onClick={() => setShowAuthModal(true)}>
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
-                </Button>
-              )} */}
-            </div>
+            <div className="flex items-center gap-2">{/* Auth controls can be added here if needed */}</div>
           </div>
           <p className="text-white/90 drop-shadow-sm">
             {hasPublicColumn
@@ -484,15 +489,15 @@ function TodoList() {
 
           {total > 0 && (
             <div className="flex justify-center gap-4 mt-4">
-              <Badge variant="outline" className="text-sm bg-white/15 backdrop-blur-sm border-white/30 text-white">
+              <Badge variant="outline" className="text-sm bg-white/20 backdrop-blur-sm border-white/40 text-white">
                 <CheckCircle2 className="w-4 h-4 mr-1" />
                 {completedCount} completed
               </Badge>
-              <Badge variant="outline" className="text-sm bg-white/15 backdrop-blur-sm border-white/30 text-white">
+              <Badge variant="outline" className="text-sm bg-white/20 backdrop-blur-sm border-white/40 text-white">
                 <Circle className="w-4 h-4 mr-1" />
                 {todos.length - completedCount} on this page
               </Badge>
-              <Badge variant="secondary" className="text-sm bg-white/20 backdrop-blur-sm border-white/30 text-white">
+              <Badge variant="secondary" className="text-sm bg-white/25 backdrop-blur-sm border-white/40 text-white">
                 Total: {total} todos
               </Badge>
             </div>
@@ -500,9 +505,12 @@ function TodoList() {
         </div>
 
         {/* Search and Filter Section */}
-        <Card className="mb-6 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
+        <Card className="mb-6 bg-white/15 backdrop-blur-lg rounded-xl border border-white/30 shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-sm" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
+            <CardTitle
+              className="flex items-center gap-2 text-white drop-shadow-sm"
+              style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
+            >
               <Search className="w-5 h-5" />
               Search & Filter
             </CardTitle>
@@ -515,21 +523,25 @@ function TodoList() {
                     placeholder="Search todos by title, description, or tags..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
+                    className="w-full bg-white/20 backdrop-blur-sm border-white/40 text-white placeholder:text-white/70"
                   />
                 </div>
                 <div className="flex gap-2">
                   <Select value={filterCompleted} onValueChange={handleFilterChange}>
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-40 bg-white/20 backdrop-blur-sm border-white/40 text-white">
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white/90 backdrop-blur-lg border-white/50">
                       <SelectItem value="all">All Todos</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button type="submit" variant="default">
+                  <Button
+                    type="submit"
+                    variant="default"
+                    className="bg-white/30 backdrop-blur-sm text-white hover:bg-white/40"
+                  >
                     <Search className="w-4 h-4 mr-2" />
                     Search
                   </Button>
@@ -546,7 +558,7 @@ function TodoList() {
               {user && hasPublicColumn && (
                 <div className="flex items-center space-x-2">
                   <Switch id="show-only-mine" checked={showOnlyMine} onCheckedChange={handleShowOnlyMineChange} />
-                  <Label htmlFor="show-only-mine" className="text-sm">
+                  <Label htmlFor="show-only-mine" className="text-sm text-white drop-shadow-sm">
                     Show only my todos
                   </Label>
                 </div>
@@ -556,13 +568,16 @@ function TodoList() {
         </Card>
 
         {/* Create Todo Form */}
-        <Card className="mb-8 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
+        <Card className="mb-8 bg-white/15 backdrop-blur-lg rounded-xl border border-white/30 shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-sm" style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}>
+            <CardTitle
+              className="flex items-center gap-2 text-white drop-shadow-sm"
+              style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
+            >
               <Plus className="w-5 h-5" />
               Add New Notes
               {!user && (
-                <Badge variant="secondary" className="ml-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
+                <Badge variant="secondary" className="ml-2 bg-white/25 backdrop-blur-sm border-white/40 text-white">
                   Sign in required
                 </Badge>
               )}
@@ -575,7 +590,7 @@ function TodoList() {
                   placeholder={user ? "What needs to be done?" : "Sign in to add todos..."}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="text-lg"
+                  className="text-lg bg-white/20 backdrop-blur-sm border-white/40 text-white placeholder:text-white/70"
                   disabled={creating || !user}
                 />
               </div>
@@ -586,6 +601,7 @@ function TodoList() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   disabled={creating || !user}
+                  className="bg-white/20 backdrop-blur-sm border-white/40 text-white placeholder:text-white/70"
                 />
               </div>
 
@@ -593,7 +609,7 @@ function TodoList() {
               {user && hasTagsColumn && (
                 <div>
                   <Label className="text-sm font-medium text-white drop-shadow-sm">Tags</Label>
-                  <div className="text-xs text-white/70 mb-2">
+                  <div className="text-xs text-white/80 mb-2">
                     Select existing tags or type new ones to create them automatically
                   </div>
                   <TagSelector
@@ -624,7 +640,11 @@ function TodoList() {
                   </Label>
                 </div>
               )}
-              <Button type="submit" disabled={creating || !title.trim() || !user} className="w-full">
+              <Button
+                type="submit"
+                disabled={creating || !title.trim() || !user}
+                className="w-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/40"
+              >
                 {!user ? "Sign in to add todos" : creating ? "Adding..." : "Add Todo"}
               </Button>
             </form>
@@ -633,16 +653,16 @@ function TodoList() {
 
         {/* Pagination Controls - Top */}
         {totalPages > 1 && (
-          <Card className="mb-6 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
+          <Card className="mb-6 bg-white/15 backdrop-blur-lg rounded-xl border border-white/30 shadow-xl">
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/80">Items per page:</span>
+                  <span className="text-sm text-white/90">Items per page:</span>
                   <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
-                    <SelectTrigger className="w-20">
+                    <SelectTrigger className="w-20 bg-white/20 backdrop-blur-sm border-white/40 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white/90 backdrop-blur-lg border-white/50">
                       <SelectItem value="5">5</SelectItem>
                       <SelectItem value="10">10</SelectItem>
                       <SelectItem value="20">20</SelectItem>
@@ -652,7 +672,7 @@ function TodoList() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/80">
+                  <span className="text-sm text-white/90">
                     Showing {(page - 1) * itemsPerPage + 1} to {Math.min(page * itemsPerPage, total)} of {total} todos
                   </span>
                 </div>
@@ -665,14 +685,14 @@ function TodoList() {
 
         {/* Todo List */}
         {loading ? (
-          <div className="text-center py-12 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white/50 mx-auto"></div>
+          <div className="text-center py-12 bg-white/15 backdrop-blur-lg rounded-xl border border-white/30 shadow-xl">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white/60 mx-auto"></div>
             <p className="text-white/90 mt-4 drop-shadow-sm">Loading todos...</p>
           </div>
         ) : todos.length === 0 ? (
-          <Card className="text-center py-12 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
+          <Card className="text-center py-12 bg-white/15 backdrop-blur-lg rounded-xl border border-white/30 shadow-xl">
             <CardContent>
-              <Circle className="w-16 h-16 text-white/50 mx-auto mb-4" />
+              <Circle className="w-16 h-16 text-white/60 mx-auto mb-4" />
               <h3
                 className="text-xl font-semibold text-white drop-shadow-sm mb-2"
                 style={{ fontFamily: "K2D, sans-serif", fontWeight: 400 }}
@@ -693,8 +713,8 @@ function TodoList() {
             {todos.map((todo) => (
               <Card
                 key={todo.id}
-                className={`transition-all duration-300 hover:shadow-xl bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-lg ${
-                  todo.completed ? "bg-green-500/10 border-green-300/30" : ""
+                className={`transition-all duration-300 hover:shadow-xl bg-white/15 backdrop-blur-lg rounded-xl border border-white/30 shadow-lg ${
+                  todo.completed ? "bg-green-500/15 border-green-300/40" : ""
                 } ${isOwner(todo) ? "border-l-4 border-l-blue-400/80" : ""}`}
               >
                 <CardContent className="p-6">
@@ -718,12 +738,18 @@ function TodoList() {
                         </h3>
                         <div className="flex items-center gap-1">
                           {isOwner(todo) ? (
-                            <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-200 border-blue-300/50">
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-blue-500/25 text-blue-200 border-blue-300/60 backdrop-blur-sm"
+                            >
                               <User className="w-3 h-3 mr-1" />
                               Mine
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-xs bg-white/10 text-white/80 border-white/30">
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-white/15 text-white/90 border-white/40 backdrop-blur-sm"
+                            >
                               <Globe className="w-3 h-3 mr-1" />
                               {hasPublicColumn ? "Public" : "Shared"}
                             </Badge>
@@ -735,14 +761,16 @@ function TodoList() {
                               </span>
                             ) : (
                               <span title="Private todo">
-                                <Lock className="w-4 h-4 text-white/60" />
+                                <Lock className="w-4 h-4 text-white/70" />
                               </span>
                             ))}
                         </div>
                       </div>
 
                       {todo.description && (
-                        <p className={`mt-2 ${todo.completed ? "text-green-200 line-through" : "text-white/90"} drop-shadow-sm`}>
+                        <p
+                          className={`mt-2 ${todo.completed ? "text-green-200 line-through" : "text-white/90"} drop-shadow-sm`}
+                        >
                           {todo.description}
                         </p>
                       )}
@@ -760,11 +788,11 @@ function TodoList() {
                               <Badge
                                 key={tagName}
                                 variant="secondary"
-                                className="text-xs"
+                                className="text-xs backdrop-blur-sm"
                                 style={{
-                                  backgroundColor: `${tagInfo.color}20`,
+                                  backgroundColor: `${tagInfo.color}30`,
                                   color: tagInfo.color,
-                                  borderColor: `${tagInfo.color}40`,
+                                  borderColor: `${tagInfo.color}60`,
                                 }}
                               >
                                 {tagInfo.icon && <span className="mr-1">{tagInfo.icon}</span>}
@@ -775,7 +803,7 @@ function TodoList() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-4 mt-3 text-sm text-white/70">
+                      <div className="flex items-center gap-4 mt-3 text-sm text-white/80">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
                           Created: {formatDate(todo.created_at)}
@@ -791,7 +819,7 @@ function TodoList() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteTodo(todo.id)}
-                        className="text-red-300 hover:text-red-200 hover:bg-red-500/20 backdrop-blur-sm"
+                        className="text-red-300 hover:text-red-200 hover:bg-red-500/25 backdrop-blur-sm"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -805,16 +833,16 @@ function TodoList() {
 
         {/* Pagination Controls - Bottom */}
         {totalPages > 1 && (
-          <Card className="mt-6 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-xl">
+          <Card className="mt-6 bg-white/15 backdrop-blur-lg rounded-xl border border-white/30 shadow-xl">
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="text-sm text-white/80">
+                <div className="text-sm text-white/90">
                   Page {page} of {totalPages}
                 </div>
 
                 <div className="flex items-center gap-1">{generatePaginationButtons()}</div>
 
-                <div className="text-sm text-white/80">Total: {total} todos</div>
+                <div className="text-sm text-white/90">Total: {total} todos</div>
               </div>
             </CardContent>
           </Card>
